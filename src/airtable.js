@@ -15,11 +15,14 @@ const base = Airtable.base(import.meta.env.VITE_AIRTABLE_BASE_ID);
 
 // Export table references
 export const tables = {
-  campaigns: base('Campaigns'),
-  listings: base('Listings'), 
-  campuses: base('Campuses'),
-  funds: base('Funds')
-};
+    campaigns: base('Campaigns'),
+    listings: base('Listings'), 
+    campuses: base('Campuses'),
+    funds: base('Funds'),
+    pledges: base('Pledges'),
+    gifts: base('Gifts'),
+    people: base('People')
+  };
 
 // Test connection function
 export const testConnection = async () => {
@@ -204,36 +207,317 @@ export const fetchOrgFundListings = async () => {
     }
   };
 
-  // Fetch all campaigns from Airtable
+// Fetch all campaigns with real pledge and gift data
 export const fetchCampaigns = async () => {
     try {
-      console.log('Fetching campaigns from Airtable...');
+      console.log('Fetching campaigns with real pledge/gift data...');
       
-      const records = await tables.campaigns.select({
-        view: 'Grid view',
-        sort: [{ field: 'CreatedDate', direction: 'desc' }] // Newest first
-      }).all();
+      // Fetch all data in parallel
+      const [campaignRecords, pledges, gifts] = await Promise.all([
+        tables.campaigns.select({
+          view: 'Grid view',
+          sort: [{ field: 'CreatedDate', direction: 'desc' }]
+        }).all(),
+        fetchPledges(),
+        fetchGifts()
+      ]);
       
-      const campaigns = records.map(record => ({
-        id: record.id,
-        name: record.get('Campaign Name'),
-        description: record.get('Description'),
-        financialGoal: record.get('FinancialGoal') || 0,
-        startDate: record.get('StartDate'),
-        endDate: record.get('EndDate'),
-        status: record.get('Status') || 'Draft',
-        scope: record.get('Scope'),
-        donationDestination: record.get('DonationDestination'),
-        assignedCampuses: record.get('AssignedCampuses') || [], // Add this line
-        // Hardcoded placeholder values for prototype
-        raised: Math.floor(Math.random() * 50000), // Random amount for demo
-        pledged: Math.floor(Math.random() * 100000) // Random amount for demo
-      }));
+      const campaigns = campaignRecords.map(record => {
+        const campaignId = record.id;
+        
+        // Calculate real stats for this campaign
+        const stats = calculateCampaignStats(campaignId, pledges, gifts);
+        
+        return {
+          id: campaignId,
+          name: record.get('Campaign Name'),
+          description: record.get('Description'),
+          financialGoal: record.get('FinancialGoal') || 0,
+          startDate: record.get('StartDate'),
+          endDate: record.get('EndDate'),
+          status: record.get('Status') || 'Draft',
+          scope: record.get('Scope'),
+          donationDestination: record.get('DonationDestination'),
+          assignedCampuses: record.get('AssignedCampuses') || [],
+          // Real calculated data instead of random numbers
+          raised: stats.totalRaised,
+          pledged: stats.totalPledged,
+          giftCount: stats.giftCount,
+          pledgeCount: stats.pledgeCount,
+          campusStats: stats.campusStats
+        };
+      });
       
-      console.log('✅ Fetched campaigns:', campaigns);
+      console.log('✅ Fetched campaigns with real data:', campaigns);
       return campaigns;
     } catch (error) {
       console.error('❌ Error fetching campaigns:', error);
+      throw error;
+    }
+  };
+
+  // Fetch all pledges from Airtable
+export const fetchPledges = async () => {
+    try {
+      console.log('Fetching pledges from Airtable...');
+      
+      const records = await tables.pledges.select({
+        view: 'Grid view',
+        sort: [{ field: 'PledgeDate', direction: 'desc' }]
+      }).all();
+      
+      const pledges = records.map(record => ({
+        id: record.id,
+        campaignId: record.get('Campaign') ? record.get('Campaign')[0] : null, // Linked field
+        campusId: record.get('PledgeCampus') ? record.get('PledgeCampus')[0] : null, // Linked field
+        donorId: record.get('Donor') ? record.get('Donor')[0] : null, // Linked field
+        amount: record.get('Amount') || 0,
+        date: record.get('PledgeDate'), // Fixed field name
+        notes: record.get('Notes')
+      }));
+      
+      console.log('✅ Fetched pledges:', pledges);
+      return pledges;
+    } catch (error) {
+      console.error('❌ Error fetching pledges:', error);
+      throw error;
+    }
+  };
+  
+  // Fetch all gifts from Airtable
+  export const fetchGifts = async () => {
+    try {
+      console.log('Fetching gifts from Airtable...');
+      
+      const records = await tables.gifts.select({
+        view: 'Grid view',
+        sort: [{ field: 'GiftDate', direction: 'desc' }]
+      }).all();
+      
+      const gifts = records.map(record => ({
+        id: record.id,
+        campaignId: record.get('Campaign') ? record.get('Campaign')[0] : null, // Linked field
+        campusId: record.get('GiftCampus') ? record.get('GiftCampus')[0] : null, // Fixed field name
+        donorId: record.get('Donor') ? record.get('Donor')[0] : null, // Linked field
+        amount: record.get('Amount') || 0,
+        date: record.get('GiftDate') // Fixed field name
+      }));
+      
+      console.log('✅ Fetched gifts:', gifts);
+      return gifts;
+    } catch (error) {
+      console.error('❌ Error fetching gifts:', error);
+      throw error;
+    }
+  };
+
+  // Calculate campaign statistics from pledges and gifts
+export const calculateCampaignStats = (campaignId, pledges, gifts) => {
+    // Filter pledges and gifts for this campaign
+    const campaignPledges = pledges.filter(pledge => pledge.campaignId === campaignId);
+    const campaignGifts = gifts.filter(gift => gift.campaignId === campaignId);
+    
+    // Calculate totals
+    const totalPledged = campaignPledges.reduce((sum, pledge) => sum + pledge.amount, 0);
+    const totalRaised = campaignGifts.reduce((sum, gift) => sum + gift.amount, 0);
+    
+    // Calculate campus breakdown
+    const campusStats = {};
+    
+    // Add pledge data by campus
+    campaignPledges.forEach(pledge => {
+      if (pledge.campusId) {
+        if (!campusStats[pledge.campusId]) {
+          campusStats[pledge.campusId] = { pledged: 0, raised: 0 };
+        }
+        campusStats[pledge.campusId].pledged += pledge.amount;
+      }
+    });
+    
+    // Add gift data by campus
+    campaignGifts.forEach(gift => {
+      if (gift.campusId) {
+        if (!campusStats[gift.campusId]) {
+          campusStats[gift.campusId] = { pledged: 0, raised: 0 };
+        }
+        campusStats[gift.campusId].raised += gift.amount;
+      }
+    });
+    
+    return {
+      totalPledged,
+      totalRaised,
+      pledgeCount: campaignPledges.length,
+      giftCount: campaignGifts.length,
+      campusStats
+    };
+  };
+
+  // Fetch a single campaign with all its pledge/gift data
+export const fetchCampaignById = async (campaignId) => {
+    try {
+      console.log('Fetching campaign by ID:', campaignId);
+      
+      // Fetch campaign details, pledges, and gifts in parallel
+      const [campaignRecord, pledges, gifts, campuses] = await Promise.all([
+        tables.campaigns.find(campaignId),
+        fetchPledges(),
+        fetchGifts(),
+        fetchCampuses()
+      ]);
+      
+      // Calculate stats for this specific campaign
+      const stats = calculateCampaignStats(campaignId, pledges, gifts);
+      
+      // Build campus breakdown with names
+      const campusBreakdown = Object.entries(stats.campusStats).map(([campusId, data]) => {
+        const campus = campuses.find(c => c.id === campusId);
+        return {
+          campusId,
+          campusName: campus?.name || 'Unknown Campus',
+          pledged: data.pledged,
+          raised: data.raised,
+          pledgeCount: pledges.filter(p => p.campaignId === campaignId && p.campusId === campusId).length,
+          giftCount: gifts.filter(g => g.campaignId === campaignId && g.campusId === campusId).length
+        };
+      });
+      
+      const campaign = {
+        id: campaignRecord.id,
+        name: campaignRecord.get('Campaign Name'),
+        description: campaignRecord.get('Description'),
+        financialGoal: campaignRecord.get('FinancialGoal') || 0,
+        startDate: campaignRecord.get('StartDate'),
+        endDate: campaignRecord.get('EndDate'),
+        status: campaignRecord.get('Status') || 'Draft',
+        scope: campaignRecord.get('Scope'),
+        donationDestination: campaignRecord.get('DonationDestination'),
+        assignedCampuses: campaignRecord.get('AssignedCampuses') || [],
+        // Real calculated data
+        totalRaised: stats.totalRaised,
+        totalPledged: stats.totalPledged,
+        giftCount: stats.giftCount,
+        pledgeCount: stats.pledgeCount,
+        campusBreakdown: campusBreakdown
+      };
+      
+      console.log('✅ Fetched campaign with details:', campaign);
+      return campaign;
+      
+    } catch (error) {
+      console.error('❌ Error fetching campaign by ID:', error);
+      throw error;
+    }
+  };
+
+  // Fetch donor data for a campaign with pledge/gift details
+export const fetchCampaignDonors = async (campaignId) => {
+    try {
+      console.log('Fetching donor data for campaign:', campaignId);
+      
+      // Fetch all data in parallel
+      const [pledges, gifts, people, campuses] = await Promise.all([
+        fetchPledges(),
+        fetchGifts(),
+        tables.people.select({ view: 'Grid view' }).all(),
+        fetchCampuses()
+      ]);
+      
+      // Filter pledges and gifts for this campaign
+      const campaignPledges = pledges.filter(pledge => pledge.campaignId === campaignId);
+      const campaignGifts = gifts.filter(gift => gift.campaignId === campaignId);
+      
+      // Get unique donor IDs
+      const pledgeDonorIds = campaignPledges.map(p => p.donorId).filter(Boolean);
+      const giftDonorIds = campaignGifts.map(g => g.donorId).filter(Boolean);
+      const allDonorIds = [...new Set([...pledgeDonorIds, ...giftDonorIds])];
+      
+      // Build donor summary
+      const donors = allDonorIds.map(donorId => {
+        // Find donor info
+        const peopleRecord = people.find(person => person.id === donorId);
+        if (!peopleRecord) return null;
+        
+        // Calculate totals for this donor
+        const donorPledges = campaignPledges.filter(p => p.donorId === donorId);
+        const donorGifts = campaignGifts.filter(g => g.donorId === donorId);
+        
+        const totalPledged = donorPledges.reduce((sum, pledge) => sum + pledge.amount, 0);
+        const totalGiven = donorGifts.reduce((sum, gift) => sum + gift.amount, 0);
+        
+        // Get campus info (from pledges or gifts)
+        const campusIds = [...new Set([
+          ...donorPledges.map(p => p.campusId).filter(Boolean),
+          ...donorGifts.map(g => g.campusId).filter(Boolean)
+        ])];
+        
+        // Get most recent pledge date
+            const pledgeDates = donorPledges.map(p => p.date).filter(Boolean);
+            const mostRecentPledgeDate = pledgeDates.length > 0 
+            ? pledgeDates.sort((a, b) => new Date(b) - new Date(a))[0]
+            : null;
+
+            // Calculate remaining amount (pledged - given, minimum 0)
+            const remaining = Math.max(0, totalPledged - totalGiven);
+
+            return {
+            donorId: donorId,
+            name: peopleRecord.get('Name') || 'Unknown',
+            email: peopleRecord.get('Email') || '',
+            homeCampus: (() => {
+                const homeCampusId = peopleRecord.get('HomeCampus');
+                if (homeCampusId && homeCampusId.length > 0) {
+                  const campus = campuses.find(c => c.id === homeCampusId[0]);
+                  return campus ? campus.name : 'Unknown Campus';
+                }
+                return '';
+              })(),
+            datePledged: mostRecentPledgeDate,
+            pledgedAmount: totalPledged,
+            givenAmount: totalGiven,
+            remaining: remaining,
+            progress: totalPledged > 0 ? (totalGiven / totalPledged) * 100 : 0,
+            pledgeCount: donorPledges.length,
+            giftCount: donorGifts.length,
+            campusIds: campusIds,
+            lastActivity: Math.max(
+                ...donorPledges.map(p => new Date(p.date || 0).getTime()),
+                ...donorGifts.map(g => new Date(g.date || 0).getTime())
+            )
+            };
+      }).filter(Boolean);
+      
+      // Sort by total given (highest first)
+      donors.sort((a, b) => b.totalGiven - a.totalGiven);
+      
+      console.log('✅ Fetched donor data:', donors);
+      return donors;
+      
+    } catch (error) {
+      console.error('❌ Error fetching donor data:', error);
+      throw error;
+    }
+  };
+
+  // Update campaign status in Airtable
+export const updateCampaignStatus = async (campaignId, newStatus) => {
+    try {
+      console.log('Updating campaign status:', campaignId, 'to', newStatus);
+      
+      const record = await tables.campaigns.update([
+        {
+          id: campaignId,
+          fields: {
+            'Status': newStatus
+          }
+        }
+      ]);
+      
+      console.log('✅ Campaign status updated successfully');
+      return record[0];
+      
+    } catch (error) {
+      console.error('❌ Error updating campaign status:', error);
       throw error;
     }
   };

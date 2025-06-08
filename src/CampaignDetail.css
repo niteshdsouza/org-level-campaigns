@@ -1,0 +1,598 @@
+/* Campaign Detail Page Styles */
+.campaign-detail {
+    padding: 0;
+    min-height: 100vh;
+    background: #f8f9fa;
+  }
+  
+  .campaign-detail-header {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 24px;
+  }
+  
+  .campaign-detail-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .campaign-detail-title h1 {
+    font-size: 32px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  
+  .campaign-detail-badges {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .detail-badge {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .detail-badge.org {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .detail-badge.live {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  
+  .campaign-detail-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  
+  .detail-action-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .detail-action-btn.primary {
+    background: #10b981;
+    color: white;
+  }
+  
+  .detail-action-btn.secondary {
+    background: white;
+    color: #10b981;
+    border: 1px solid #10b981;
+  }
+  
+  /* Overview Stats Section */
+  .campaign-overview {
+    padding: 32px 24px;
+    background: white;
+    margin: 24px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .overview-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 24px;
+  }
+  
+  .overview-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 32px;
+    margin-bottom: 32px;
+  }
+  
+  .overview-stat {
+    text-align: center;
+  }
+  
+  .overview-stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+  }
+  
+  .overview-stat-label {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 8px;
+  }
+  
+  .overview-stat-sublabel {
+    font-size: 12px;
+    color: #9ca3af;
+  }
+  
+  /* Progress Bar */
+  .detail-progress-section {
+    margin-top: 24px;
+  }
+  
+  .detail-progress-bar {
+    height: 30px;
+    background: #f3f4f6;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 16px;
+  }
+  
+  .detail-progress-fill {
+    height: 100%;
+    background: #10b981;
+    transition: width 0.3s ease;
+  }
+  
+  .detail-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #6b7280;
+  }
+  
+  /* Campus Breakdown Table */
+  .campus-breakdown {
+    padding: 32px 24px;
+    background: white;
+    margin: 24px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .breakdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .breakdown-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+  
+  .breakdown-search {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .breakdown-search input {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 200px;
+  }
+  
+  .breakdown-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .breakdown-table th,
+  .breakdown-table td {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .breakdown-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .breakdown-table td {
+    color: #6b7280;
+    font-size: 14px;
+  }
+  
+  .campus-name-cell {
+    color: #10b981;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .campus-name-cell:hover {
+    text-decoration: underline;
+  }
+  
+ /* Individual Stats Row - Exact translation from inline styles */
+ .individual-stats {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-evenly !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    margin-top: 32px !important;
+    padding: 24px 0 !important;
+    border-top: 1px solid #e5e7eb !important;
+  }
+
+.individual-stat {
+  flex: 1;
+  text-align: center;
+  max-width: 33.33%;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+  
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .campaign-detail-header {
+      padding: 16px;
+    }
+    
+    .campaign-overview,
+    .campus-breakdown {
+      margin: 16px;
+      padding: 24px 16px;
+    }
+    
+    .overview-stats {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    
+    .breakdown-header {
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    
+    .breakdown-search input {
+      width: 100%;
+    }
+    
+    .breakdown-table {
+      font-size: 12px;
+    }
+    
+    /* Individual Stats Mobile */
+    .individual-stats {
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px 0;
+    }
+    
+    .individual-stat {
+      max-width: 100%;
+      padding: 16px;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+    
+    .stat-value {
+      font-size: 20px;
+    }
+  }
+
+  /* Breakdown Tabs */
+.breakdown-tabs {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 24px;
+  }
+  
+  .breakdown-tab {
+    background: none;
+    border: none;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+  
+  .breakdown-tab.active {
+    color: #10b981;
+    border-bottom-color: #10b981;
+  }
+  
+  .breakdown-tab:hover {
+    color: #374151;
+  }
+  
+  /* Updated Breakdown Header */
+  .breakdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+  }
+  
+  .breakdown-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .breakdown-search input {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 200px;
+  }
+  
+  .search-button {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .search-button:hover {
+    background: #059669;
+  }
+  
+  .export-button {
+    background: white;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .export-button:hover {
+    background: #f9fafb;
+    color: #374151;
+  }
+  
+  /* Mobile Responsiveness for Tabs */
+  @media (max-width: 768px) {
+    .breakdown-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+    }
+    
+    .breakdown-search {
+      justify-content: center;
+    }
+    
+    .breakdown-search input {
+      flex: 1;
+      max-width: 250px;
+    }
+    
+    .export-button {
+      align-self: flex-end;
+    }
+  }
+
+  /* Tab Filter Indicator */
+.tab-filter-indicator {
+    font-size: 12px;
+    color: #059669;
+    font-weight: 400;
+    margin-left: 4px;
+  }
+  
+  .clear-filter-btn {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: background-color 0.2s;
+  }
+  
+  .clear-filter-btn:hover {
+    background: #dc2626;
+  }
+
+  /* Members Tab Content */
+.members-content {
+    /* Inherits table styling from existing breakdown styles */
+  }
+  
+  .members-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .members-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  
+  .donor-count {
+    font-size: 14px;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 4px 12px;
+    border-radius: 12px;
+  }
+  
+  /* Donor Table Styling */
+  .donor-name {
+    font-weight: 500;
+    color: #1a1a1a;
+    font-size: 14px;
+  }
+  
+  .donor-email {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+  }
+  
+  /* Fulfillment Rate Indicators */
+  .fulfillment-rate {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .fulfillment-rate.complete {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  
+  .fulfillment-rate.partial {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  
+  .fulfillment-rate.none {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  
+  /* Mobile Responsiveness for Members */
+  @media (max-width: 768px) {
+    .members-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    
+    .donor-count {
+      align-self: flex-end;
+    }
+    
+    .breakdown-table th:nth-child(4),
+    .breakdown-table td:nth-child(4) {
+      display: none; /* Hide fulfillment rate on very small screens */
+    }
+  }
+
+  /* Enhanced Members Table */
+.progress-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 100px;
+  }
+  
+  .progress-bar-small {
+    flex: 1;
+    height: 8px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    overflow: hidden;
+    min-width: 60px;
+  }
+  
+  .progress-fill-small {
+    height: 100%;
+    background: #10b981;
+    transition: width 0.3s ease;
+  }
+  
+  .progress-text-small {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+    min-width: 35px;
+    text-align: right;
+  }
+  
+  .row-menu-btn {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 16px;
+    line-height: 1;
+  }
+  
+  .row-menu-btn:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+  
+  /* Table Column Widths for Better Layout */
+  .breakdown-table th:nth-child(1) { width: 12%; } /* Name */
+  .breakdown-table th:nth-child(2) { width: 15%; } /* Email */
+  .breakdown-table th:nth-child(3) { width: 12%; } /* Home campus */
+  .breakdown-table th:nth-child(4) { width: 12%; } /* Date pledged */
+  .breakdown-table th:nth-child(5) { width: 10%; } /* Pledged amount */
+  .breakdown-table th:nth-child(6) { width: 10%; } /* Given amount */
+  .breakdown-table th:nth-child(7) { width: 10%; } /* Remaining */
+  .breakdown-table th:nth-child(8) { width: 15%; } /* Progress */
+  .breakdown-table th:nth-child(9) { width: 4%; }  /* Menu button */
+  
+  /* Mobile Responsiveness for Enhanced Table */
+  @media (max-width: 1024px) {
+    .breakdown-table th:nth-child(3),
+    .breakdown-table td:nth-child(3),
+    .breakdown-table th:nth-child(4),
+    .breakdown-table td:nth-child(4) {
+      display: none; /* Hide home campus and date on smaller screens */
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .breakdown-table th:nth-child(7),
+    .breakdown-table td:nth-child(7) {
+      display: none; /* Hide remaining amount on mobile */
+    }
+    
+    .progress-cell {
+      min-width: 80px;
+    }
+    
+    .progress-bar-small {
+      min-width: 40px;
+    }
+  }
