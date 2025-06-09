@@ -1,0 +1,835 @@
+/* Add Pledge Page Styles - Updated to match design */
+.add-pledge-container {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #f8f9fa;
+    min-height: 100vh;
+  }
+  
+  /* Header */
+  .add-pledge-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 0 8px;
+  }
+  
+  .add-pledge-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+  }
+  
+  /* Form Container - Updated styling */
+  .pledge-form-container {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 32px;
+    margin-bottom: 32px;
+    box-shadow: none;
+  }
+  
+  /* Form Groups - Reduced spacing */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+  
+  /* Campaign & Campus Select - Compact styling */
+  .select-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .campaign-select,
+  .campus-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    appearance: none;
+    padding-right: 36px;
+  }
+  
+  .campaign-select:focus,
+  .campus-select:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+  
+  .campaign-select:disabled,
+  .campus-select:disabled {
+    background-color: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+  
+  .select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-size: 12px;
+    pointer-events: none;
+  }
+  
+  /* Member Input - Compact styling */
+  .member-search-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .member-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #374151;
+    background: white;
+  }
+  
+  .member-input::placeholder {
+    color: #9ca3af;
+    font-style: normal;
+  }
+  
+  .member-input:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+  
+  /* Search Loading Indicator */
+  .search-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+  
+  .loading-spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Member Dropdown */
+  .member-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .member-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s;
+  }
+  
+  .member-option:hover {
+    background: #f9fafb;
+  }
+  
+  .member-option:last-child {
+    border-bottom: none;
+  }
+  
+  .member-option-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .member-option-name {
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+  }
+  
+  .member-option-email {
+    font-size: 12px;
+    color: #6b7280;
+  }
+  
+  .member-option-campus {
+    font-size: 12px;
+    color: #10b981;
+    background: #f0fdf4;
+    padding: 2px 6px;
+    border-radius: 12px;
+  }
+  
+  /* No Members Found */
+  .no-members-found {
+    padding: 16px;
+    text-align: center;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .no-members-text {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 12px;
+  }
+  
+  .add-new-member-suggestion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 16px;
+    background: #f0fdf4;
+    color: #10b981;
+    border: 1px solid #10b981;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .add-new-member-suggestion:hover {
+    background: #dcfce7;
+  }
+  
+  /* Selected Member Info - Compact */
+  .selected-member-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 6px 10px;
+    background: #f0fdf4;
+    border: 1px solid #10b981;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  
+  .selected-member-icon {
+    color: #10b981;
+    font-weight: bold;
+  }
+  
+  .selected-member-text {
+    color: #065f46;
+  }
+  
+  /* Pledge Amount Input - Compact */
+  .pledge-amount-input {
+    width: 100%;
+    max-width: 200px;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 16px;
+    color: #374151;
+    background: white;
+    font-weight: 500;
+  }
+  
+  .pledge-amount-input::placeholder {
+    color: #9ca3af;
+    font-style: normal;
+  }
+  
+  .pledge-amount-input:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+  
+  /* Add New Member Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
+  }
+  
+  .modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  
+  .modal-close:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+  
+  .modal-form {
+    padding: 24px;
+  }
+  
+  .modal-field {
+    margin-bottom: 20px;
+  }
+  
+  .modal-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+  
+  .required-asterisk {
+    color: #ef4444;
+  }
+  
+  .modal-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #374151;
+    background: white;
+    box-sizing: border-box;
+  }
+  
+  .modal-input:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+  
+  .modal-input::placeholder {
+    color: #9ca3af;
+  }
+  
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    justify-content: flex-end;
+  }
+  
+  .modal-btn-cancel {
+    padding: 10px 20px;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .modal-btn-cancel:hover:not(:disabled) {
+    background: #f9fafb;
+    border-color: #9ca3af;
+  }
+  
+  .modal-btn-cancel:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .modal-btn-submit {
+    padding: 10px 20px;
+    border: none;
+    background: #10b981;
+    color: white;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .modal-btn-submit:hover:not(:disabled) {
+    background: #059669;
+  }
+  
+  .modal-btn-submit:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+  
+  /* Form Actions - Compact spacing */
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  
+  .btn-reset {
+    padding: 10px 20px;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #6b7280;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-reset:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #374151;
+  }
+  
+  .btn-add-pledge {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-add-pledge.enabled {
+    background: #10b981;
+    color: white;
+  }
+  
+  .btn-add-pledge.enabled:hover {
+    background: #059669;
+  }
+  
+  .btn-add-pledge.disabled {
+    background: #f3f4f6;
+    color: #d1d5db;
+    cursor: not-allowed;
+  }
+  
+  /* Recent Pledges Section */
+  .recent-pledges-section {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 32px;
+    box-shadow: none;
+  }
+  
+  .recent-pledges-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 24px 0;
+  }
+  
+  /* Pledges Table */
+  .pledges-table-container {
+    overflow-x: auto;
+  }
+  
+  .pledges-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .pledges-table th,
+  .pledges-table td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .pledges-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .pledges-table td {
+    color: #6b7280;
+    font-size: 14px;
+  }
+  
+  .name-cell {
+    color: #374151;
+    font-weight: 500;
+  }
+  
+  .email-cell {
+    color: #6b7280;
+  }
+  
+  .campaign-cell {
+    color: #6b7280;
+  }
+  
+  .amount-cell {
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  .delete-btn {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .delete-btn:hover {
+    background: #fee2e2;
+  }
+  
+  /* Mobile Responsiveness */
+  @media (max-width: 768px) {
+    .add-pledge-container {
+      padding: 16px;
+    }
+    
+    .add-pledge-header {
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    
+    .pledge-form-container {
+      padding: 24px;
+    }
+    
+    .campaign-select,
+    .member-input {
+      max-width: 100%;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+    
+    .pledges-table-container {
+      overflow-x: scroll;
+    }
+    
+    .pledges-table {
+      min-width: 600px;
+    }
+  }
+
+  /* Pledge Date Input */
+.pledge-date-input {
+    width: 100%;
+    max-width: 200px;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #374151;
+    background: white;
+    cursor: pointer;
+  }
+  
+  .pledge-date-input:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+  
+  .pledge-date-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.7;
+  }
+  
+  .pledge-date-input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+  }
+
+/* Duplicate Modal Specific Styling */
+.duplicate-modal {
+    max-width: 600px;
+  }
+  
+  .modal-body {
+    padding: 24px;
+  }
+  
+  /* Warning Section */
+  .duplicate-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 8px;
+    margin-bottom: 24px;
+  }
+  
+  .warning-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  
+  .warning-text {
+    flex: 1;
+  }
+  
+  .warning-text p {
+    margin: 0;
+    font-size: 14px;
+    color: #92400e;
+    line-height: 1.5;
+  }
+  
+  /* Pledge Comparison */
+  .pledge-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .existing-pledge,
+  .new-pledge {
+    text-align: center;
+  }
+  
+  .existing-pledge h4,
+  .new-pledge h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  .pledge-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .pledge-details .amount {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+  
+  .existing-pledge .amount {
+    color: #dc2626;
+  }
+  
+  .new-pledge .amount {
+    color: #10b981;
+  }
+  
+  .pledge-details .date {
+    font-size: 12px;
+    color: #6b7280;
+  }
+  
+  /* Update Explanation */
+  .update-explanation {
+    font-size: 14px;
+    color: #6b7280;
+    text-align: center;
+    margin: 0;
+    line-height: 1.5;
+  }
+  
+  /* Loading state for Add Pledge button */
+  .btn-add-pledge .loading-spinner,
+  .modal-btn-submit .loading-spinner {
+    display: inline-block;
+    margin-right: 8px;
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Responsive Design for Duplicate Modal */
+  @media (max-width: 768px) {
+    .duplicate-modal {
+      max-width: 90vw;
+      margin: 20px;
+    }
+    
+    .pledge-comparison {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    
+    .modal-body {
+      padding: 20px;
+    }
+    
+    .modal-actions {
+      padding: 20px;
+      margin-left: -20px;
+      margin-right: -20px;
+      margin-bottom: -20px;
+      flex-direction: column;
+    }
+    
+    .modal-btn-cancel,
+    .modal-btn-submit {
+      width: 100%;
+    }
+    
+    .duplicate-warning {
+      padding: 12px;
+    }
+    
+    .warning-text p {
+      font-size: 13px;
+    }
+    
+    .pledge-details .amount {
+      font-size: 18px;
+    }
+  }
+  
+  /* Enhanced button states */
+  .btn-add-pledge:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .modal-btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Loading state for recent pledges */
+  .loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 20px;
+    color: #6b7280;
+    font-size: 14px;
+  }
+  
+  .loading-state .loading-spinner {
+    font-size: 18px;
+  }
+  
+  /* No pledges message */
+  .no-pledges-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9ca3af;
+    font-style: italic;
+  }
+  
+  /* Recent Pledges Section */
+  .recent-pledges-section {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 32px;
+    box-shadow: none;
+  }
+  .pledges-table th:nth-child(5) {
+    min-width: 100px;
+  }
+  
+  .campus-cell {
+    color: #10b981;
+    font-weight: 500;
+  }
+  
+  .pledges-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+  
+  .campaign-cell {
+    max-width: 180px;
+  }
+  
+  .delete-btn {
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  
+  .delete-btn:hover {
+    opacity: 1;
+  }

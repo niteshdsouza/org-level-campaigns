@@ -170,11 +170,21 @@ function CampaignDetail({ userRole, userCampuses }) {
           </div>
         </div>
 
-        {/* Progress Bar */}
+       {/* Progress Bar */}
         <div className="detail-progress-section">
           <div className="detail-progress-bar">
+            {/* Pledged amount (light green background) */}
             <div 
-              className="detail-progress-fill"
+              className="detail-progress-pledged"
+              style={{
+                width: campaign?.financialGoal > 0 
+                  ? `${Math.min((campaign?.totalPledged / campaign?.financialGoal) * 100, 100)}%`
+                  : '0%'
+              }}
+            ></div>
+            {/* Raised amount (dark green, on top) */}
+            <div 
+              className="detail-progress-raised"
               style={{
                 width: campaign?.financialGoal > 0 
                   ? `${Math.min((campaign?.totalRaised / campaign?.financialGoal) * 100, 100)}%`

@@ -5,6 +5,8 @@ import CreateCampaign from './CreateCampaign';
 import AssignCampuses from './AssignCampuses';
 import { fetchCampaigns } from './airtable';
 import CampaignDetail from './CampaignDetail';
+import AddPledge from './AddPledge';
+
 
 
 // Role Selection Component
@@ -349,7 +351,11 @@ const handleCloseCampaign = async (campaignId) => {
                   <span>Overview</span>
                   <span className="checkmark">✓</span>
                 </div>
-                <div className="submenu-item">
+                <div 
+                  className="submenu-item"
+                  onClick={() => navigate('/add-pledge')}
+                  style={{ cursor: 'pointer' }}
+                >
                   <span>Add a pledge</span>
                 </div>
               </div>
@@ -651,127 +657,172 @@ const handleCloseCampaign = async (campaignId) => {
                 )}
               </div>
             ) : (
-              filteredCampaigns.map((campaign) => (
-                <div key={campaign.id} className="campaign-card">
-                  <div className="campaign-header">
-                    <div className="campaign-title">
-                      <h3 
-                        onClick={() => navigate(`/campaign/${campaign.id}`)}
-                        style={{ cursor: 'pointer', color: '#10b981' }}
-                        onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                        onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                      >
-                        {campaign.name}
-                      </h3>
-                      <span className="org-badge">
-                        {campaign.scope === 'Org' ? 'Org campaign' : 'Campus campaign'}
-                      </span>
-                      <span className={`status-badge ${
-                        campaign.startDate && new Date() >= new Date(campaign.startDate) ? 'live' : 'scheduled'
-                      }`}>
-                        {campaign.startDate && new Date() >= new Date(campaign.startDate) ? 'Live' : 'Scheduled'}
-                      </span>
-                      <span className={`status-badge ${campaign.status?.toLowerCase() || 'draft'}`}>
-                        {campaign.status || 'Draft'}
-                      </span>
-                    </div>
-                    <div className="menu-container">
-                      <button 
-                        className="menu-dots"
-                        onClick={() => setOpenDropdown(openDropdown === campaign.id ? null : campaign.id)}
-                      >
-                        ⋯
-                      </button>
-                      {openDropdown === campaign.id && (
-                        <div className="dropdown-menu">
-                          <div 
-                            className="dropdown-item"
-                            onClick={() => {
-                              navigate(`/campaign/${campaign.id}`);
-                              setOpenDropdown(null);
-                            }}
-                          >
-                            <span className="dropdown-icon">↗</span>
-                            View Details
-                          </div>
-                          <div className="dropdown-item">
-                            <span className="dropdown-icon">✏</span>
-                            Edit Campaign
-                          </div>
-                          <div className="dropdown-item">
-                            <span className="dropdown-icon">📋</span>
-                            Duplicate
-                          </div>
-                          <div 
-                            className={`dropdown-item ${campaign.status === 'Closed' ? 'disabled' : ''}`}
-                            style={{
-                              opacity: campaign.status === 'Closed' ? 0.5 : 1,
-                              cursor: campaign.status === 'Closed' ? 'not-allowed' : 'pointer',
-                              pointerEvents: campaign.status === 'Closed' ? 'none' : 'auto'
-                            }}
-                            onClick={() => {
-                              if (campaign.status !== 'Closed') {
-                                setCampaignToClose(campaign);
-                                setShowCloseModal(true);
-                              }
-                            }}
-                          >
-                            <span className="dropdown-icon">✕</span>
-                            Close
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="campaign-stats">
-                    <div className="stat">
-                      <span className="label">Raised</span>
-                      <span className="value">${campaign.raised?.toLocaleString() || '0'}</span>
-                    </div>
-                    <div className="stat">
-                      <span className="label">Pledged</span>
-                      <span className="value">${campaign.pledged?.toLocaleString() || '0'}</span>
-                    </div>
-                    <div className="stat">
-                      <span className="label">Goal</span>
-                      <span className="value">${campaign.financialGoal?.toLocaleString() || '0'}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="progress-section">
-                    <div className="progress-bar">
-                      <div 
-                        className="progress" 
-                        style={{
-                          width: campaign.financialGoal > 0 
-                            ? `${Math.min((campaign.raised / campaign.financialGoal) * 100, 100)}%`
-                            : '0%'
-                        }}
-                      ></div>
-                    </div>
-                    <span className="progress-text">
-                      {campaign.financialGoal > 0 
-                        ? `${Math.round((campaign.raised / campaign.financialGoal) * 100)}%`
-                        : '0%'
-                      }
-                    </span>
-                  </div>
-                  
-                  <div className="campaign-footer">
-                    <span className="campaign-dates">
-                      {campaign.startDate && campaign.endDate 
-                        ? `${new Date(campaign.startDate).toLocaleDateString()} - ${new Date(campaign.endDate).toLocaleDateString()}`
-                        : 'Dates not set'
-                      }
-                    </span>
-                    <div className="campaign-actions">
-                      <button className="action-btn">🔗 Add pledge</button>
-                      <button className="action-btn">📤 Share</button>
-                    </div>
-                  </div>
-                </div>
-              ))
+              // Replace your existing campaign card mapping with this improved structure
+
+filteredCampaigns.map((campaign) => (
+  <div key={campaign.id} className="campaign-card">
+    {/* NEW: Campaign Header with Name and Menu */}
+    <div className="campaign-card-header">
+      <div className="campaign-card-title">
+        <h3 
+          onClick={() => navigate(`/campaign/${campaign.id}`)}
+        >
+          {campaign.name}
+        </h3>
+        <div className="campaign-header-badges">
+          <span className="org-badge">
+            {campaign.scope === 'Org' ? 'Org campaign' : 'Campus campaign'}
+          </span>
+          <span className={`status-badge ${
+            campaign.startDate && new Date() >= new Date(campaign.startDate) ? 'live' : 'scheduled'
+          }`}>
+            {campaign.startDate && new Date() >= new Date(campaign.startDate) ? 'Live' : 'Scheduled'}
+          </span>
+          <span className={`status-badge ${campaign.status?.toLowerCase() || 'draft'}`}>
+            {campaign.status || 'Draft'}
+          </span>
+        </div>
+      </div>
+      
+      {/* Menu Dropdown */}
+      <div className="campaign-card-menu">
+        <div className="menu-container">
+          <button 
+            className="menu-dots"
+            onClick={() => setOpenDropdown(openDropdown === campaign.id ? null : campaign.id)}
+          >
+            ⋯
+          </button>
+          {openDropdown === campaign.id && (
+            <div className="dropdown-menu">
+              <div 
+                className="dropdown-item"
+                onClick={() => {
+                  navigate(`/campaign/${campaign.id}`);
+                  setOpenDropdown(null);
+                }}
+              >
+                <span className="dropdown-icon">↗</span>
+                View Details
+              </div>
+              <div className="dropdown-item">
+                <span className="dropdown-icon">✏</span>
+                Edit Campaign
+              </div>
+              <div className="dropdown-item">
+                <span className="dropdown-icon">📋</span>
+                Duplicate
+              </div>
+              <div 
+                className={`dropdown-item ${campaign.status === 'Closed' ? 'disabled' : ''}`}
+                style={{
+                  opacity: campaign.status === 'Closed' ? 0.5 : 1,
+                  cursor: campaign.status === 'Closed' ? 'not-allowed' : 'pointer',
+                  pointerEvents: campaign.status === 'Closed' ? 'none' : 'auto'
+                }}
+                onClick={() => {
+                  if (campaign.status !== 'Closed') {
+                    setCampaignToClose(campaign);
+                    setShowCloseModal(true);
+                  }
+                }}
+              >
+                <span className="dropdown-icon">✕</span>
+                Close
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+
+    {/* NEW: Campaign Body */}
+    <div className="campaign-card-body">
+      {/* Main Stats Row */}
+      <div className="campaign-main-stats">
+        <div className="main-stat-raised">
+          <span className="label">Raised</span>
+          <span className="value">${campaign.raised?.toLocaleString() || '0'}</span>
+        </div>
+        
+        <div className="secondary-stat">
+          <span className="label">Pledged</span>
+          <span className="value">${campaign.pledged?.toLocaleString() || '0'}</span>
+        </div>
+        
+        <div className="secondary-stat">
+          <span className="label">Goal</span>
+          <span className="value">${campaign.financialGoal?.toLocaleString() || '0'}</span>
+        </div>
+       </div>
+
+      {/* Enhanced Progress Bar */}
+      <div className="campaign-progress-container">
+        <div className="campaign-progress-bar">
+          {/* Pledged amount (light green background) */}
+          <div 
+            className="progress-fill-pledged"
+            style={{
+              width: campaign.financialGoal > 0 
+                ? `${Math.min((campaign.pledged / campaign.financialGoal) * 100, 100)}%`
+                : '0%'
+            }}
+          ></div>
+          {/* Raised amount (dark green, on top) */}
+          <div 
+            className="progress-fill-raised"
+            style={{
+              width: campaign.financialGoal > 0 
+                ? `${Math.min((campaign.raised / campaign.financialGoal) * 100, 100)}%`
+                : '0%'
+            }}
+          ></div>
+        </div>
+        
+        <div className="progress-labels">
+          <span className="progress-percentage">
+            {campaign.financialGoal > 0 
+              ? `${Math.round((campaign.raised / campaign.financialGoal) * 100)}%`
+              : '0%'
+            }
+          </span>
+          <span className="goal-text">
+            {campaign.financialGoal > 0 
+              ? `${Math.round((campaign.pledged / campaign.financialGoal) * 100)}% pledged`
+              : '0% pledged'
+            }
+          </span>
+        </div>
+      </div>
+
+      {/* Campaign Footer */}
+      <div className="campaign-card-footer">
+        <span className="campaign-dates">
+          {campaign.startDate && campaign.endDate 
+            ? `Started ${new Date(campaign.startDate).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+              })} • Ends ${new Date(campaign.endDate).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+              })}`
+            : 'Dates not set'
+          }
+        </span>
+        <div className="campaign-actions">
+          <button className="action-btn">
+            🔗 Add pledge
+          </button>
+          <button className="action-btn">
+            📤 Share
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+))
             )}
           </div>
         </div>
@@ -881,6 +932,7 @@ function App() {
         <Route path="/campaign/:id" element={<CampaignDetail userRole={userRole} userCampuses={userCampuses} />} />
         <Route path="/create-campaign" element={<CreateCampaign />} />
         <Route path="/assign-campuses" element={<AssignCampuses />} />
+        <Route path="/add-pledge" element={<AddPledge userRole={userRole} userCampuses={userCampuses} />} />
       </Routes>
     </Router>
   )

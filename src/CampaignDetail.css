@@ -144,6 +144,24 @@
     font-size: 12px;
     color: #6b7280;
   }
+
+  .detail-progress-raised {
+    height: 100%;
+    background: #10b981;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: width 0.3s ease;
+  }
+
+  .detail-progress-pledged {
+    height: 100%;
+    background: #86efac;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: width 0.3s ease;
+  }
   
   /* Campus Breakdown Table */
   .campus-breakdown {

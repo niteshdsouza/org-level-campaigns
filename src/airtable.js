@@ -155,7 +155,7 @@ export const createCampaign = async (campaignData, fundId, selectedCampusIds) =>
             'EndDate': campaignData.endDate || null,
             'PhoneNumber': campaignData.phoneNumber || null,
             'EmailAddress': campaignData.emailAddress || null,
-            'Status': 'Draft', // Default status
+            'Status': 'Published', // Default status
             //'CreatedDate': new Date().toISOString().split('T')[0],
             //'ModifiedDate': new Date().toISOString().split('T')[0],
             'DonationDestination': campaignData.donationDestination === 'fund' ? 'Org Fund' : 'Campus',
