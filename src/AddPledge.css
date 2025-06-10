@@ -833,3 +833,282 @@
   .delete-btn:hover {
     opacity: 1;
   }
+
+ /* Add these styles to your existing AddPledge.css file */
+
+/* Pledge Amount Container */
+.pledge-amount-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.pledge-amount-input {
+  flex: 1;
+  max-width: 200px;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  background: white;
+  box-sizing: border-box;
+}
+
+.pledge-amount-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* Total Amount Display */
+.total-amount-display {
+  font-size: 13px;
+  color: #6b7280;
+  font-style: italic;
+  animation: fadeIn 0.3s ease-out;
+  white-space: nowrap;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.giving-frequency-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.pledge-type-options {
+  flex-shrink: 0;
+}
+
+.radio-group {
+  display: flex;
+  gap: 24px;
+  margin-top: 0;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.radio-option input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.radio-label {
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+
+/* Recurring Frequency Inline */
+.recurring-frequency-inline {
+  flex: 1;
+  max-width: 200px;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.recurring-frequency-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  background: white;
+  box-sizing: border-box;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 32px;
+}
+
+.recurring-frequency-select:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* Pledge Date Container */
+.pledge-date-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.pledge-date-section {
+  flex: 1;
+  max-width: 200px;
+}
+
+.pledge-date-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  background: white;
+  box-sizing: border-box;
+}
+
+.pledge-date-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* End Date Inline */
+.end-date-inline {
+  flex: 1;
+  max-width: 200px;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.inline-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.pledge-end-date-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  background: white;
+  box-sizing: border-box;
+}
+
+.pledge-end-date-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* Remove old styles that are no longer needed */
+.recurring-frequency-group,
+.recurring-end-date-group {
+  display: none; /* These are now inline */
+}
+
+.field-hint {
+  display: none; /* Removed as requested */
+}
+
+/* Animation for inline elements */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Pledge Type Badge in Table */
+.pledge-type-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pledge-type-badge.one-time {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.pledge-type-badge.recurring {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Table adjustments for new column */
+.pledges-table th:nth-child(6),
+.pledges-table td:nth-child(6) {
+  min-width: 120px;
+}
+
+.type-cell {
+  white-space: nowrap;
+}
+
+/* Update button validation to include recurring frequency check */
+.btn-add-pledge.disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-add-pledge.enabled {
+  background: #10b981;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-add-pledge.enabled:hover {
+  background: #059669;
+}
+
+/* Mobile responsiveness for new inline fields */
+@media (max-width: 768px) {
+  .giving-frequency-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .pledge-date-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .radio-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .recurring-frequency-inline,
+  .end-date-inline {
+    max-width: 100%;
+  }
+  
+  .pledges-table th:nth-child(6),
+  .pledges-table td:nth-child(6) {
+    min-width: 100px;
+    font-size: 12px;
+  }
+  
+  .pledge-type-badge {
+    padding: 2px 6px;
+    font-size: 10px;
+  }
+}

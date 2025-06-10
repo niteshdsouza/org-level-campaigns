@@ -213,13 +213,14 @@ export const fetchCampaigns = async () => {
       console.log('Fetching campaigns with real pledge/gift data...');
       
       // Fetch all data in parallel
-      const [campaignRecords, pledges, gifts] = await Promise.all([
+      const [campaignRecords, pledges, gifts, campuses] = await Promise.all([
         tables.campaigns.select({
           view: 'Grid view',
           sort: [{ field: 'CreatedDate', direction: 'desc' }]
         }).all(),
         fetchPledges(),
-        fetchGifts()
+        fetchGifts(),
+        fetchCampuses() // ADD: Fetch campuses to build breakdown with names
       ]);
       
       const campaigns = campaignRecords.map(record => {
@@ -228,27 +229,46 @@ export const fetchCampaigns = async () => {
         // Calculate real stats for this campaign
         const stats = calculateCampaignStats(campaignId, pledges, gifts);
         
+        // NEW: Build campus breakdown with names (same as fetchCampaignById)
+        const campusBreakdown = Object.entries(stats.campusStats).map(([campusId, data]) => {
+          const campus = campuses.find(c => c.id === campusId);
+          return {
+            campusId,
+            campusName: campus?.name || 'Unknown Campus',
+            pledged: data.pledged,
+            raised: data.raised,
+            pledgeCount: pledges.filter(p => p.campaignId === campaignId && p.campusId === campusId).length,
+            giftCount: gifts.filter(g => g.campaignId === campaignId && g.campusId === campusId).length
+          };
+        });
+        
         return {
           id: campaignId,
           name: record.get('Campaign Name'),
           description: record.get('Description'),
-          financialGoal: record.get('FinancialGoal') || 0,
+          financialGoal: (() => {
+            const goal = record.get('FinancialGoal');
+            console.log(`Campaign ${record.get('Campaign Name')} - Raw FinancialGoal from Airtable:`, goal, typeof goal);
+            return goal || 0;
+          })(),
           startDate: record.get('StartDate'),
           endDate: record.get('EndDate'),
           status: record.get('Status') || 'Draft',
           scope: record.get('Scope'),
           donationDestination: record.get('DonationDestination'),
           assignedCampuses: record.get('AssignedCampuses') || [],
+          orgFundListing: record.get('OrgFundListing'),
           // Real calculated data instead of random numbers
           raised: stats.totalRaised,
           pledged: stats.totalPledged,
           giftCount: stats.giftCount,
           pledgeCount: stats.pledgeCount,
-          campusStats: stats.campusStats
+          campusStats: stats.campusStats, // Keep for backward compatibility
+          campusBreakdown: campusBreakdown // NEW: Add the same field as fetchCampaignById
         };
       });
       
-      console.log('✅ Fetched campaigns with real data:', campaigns);
+      console.log('✅ Fetched campaigns with real data and campus breakdown:', campaigns);
       return campaigns;
     } catch (error) {
       console.error('❌ Error fetching campaigns:', error);

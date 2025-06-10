@@ -10,50 +10,6 @@ import ShareModal from './ShareModal';
 import PledgePage from './PledgePage';
 import GivingPage from './GivingPage';
 
-// Helper function to calculate role-based campaign statistics
-const calculateRoleBasedCampaignStats = (campaign, userRole, userCampuses) => {
-  // Financial goal stays the same for everyone (it's the campaign's overall goal)
-  const financialGoal = campaign.financialGoal || 0;
-  
-  // If no campus breakdown data exists, return the original totals
-  if (!campaign.campusBreakdown || campaign.campusBreakdown.length === 0) {
-    return {
-      raised: campaign.raised || 0,
-      pledged: campaign.pledged || 0,
-      financialGoal: financialGoal
-    };
-  }
-  
-  let filteredCampusData = [];
-  
-  if (userRole === 'org-admin') {
-    // Org admin sees ALL campus data
-    filteredCampusData = campaign.campusBreakdown;
-  } else if (userRole === 'single-campus' || userRole === 'multi-campus') {
-    // Campus admins only see data for their assigned campuses
-    filteredCampusData = campaign.campusBreakdown.filter(campus => 
-      userCampuses.includes(campus.campusId)
-    );
-  } else {
-    // Fallback - show all data if role is unknown
-    filteredCampusData = campaign.campusBreakdown;
-  }
-  
-  // Aggregate the filtered campus data
-  const aggregatedStats = filteredCampusData.reduce((totals, campus) => {
-    return {
-      raised: totals.raised + (campus.raised || 0),
-      pledged: totals.pledged + (campus.pledged || 0)
-    };
-  }, { raised: 0, pledged: 0 });
-  
-  return {
-    raised: aggregatedStats.raised,
-    pledged: aggregatedStats.pledged,
-    financialGoal: financialGoal
-  };
-};
-
 // Role Selection Component
 function RoleSelection({ setUserRole, setUserCampuses }) {
   const navigate = useNavigate()
@@ -147,7 +103,7 @@ function OrgAdmin({ userRole, userCampuses, onRoleSwitch }) {
   const [selectedCampusFilter, setSelectedCampusFilter] = useState('all');
   const [availableCampuses, setAvailableCampuses] = useState([]);
   const [loadingCampuses, setLoadingCampuses] = useState(true);
-
+  
   // NEW: Status filter state
   const [selectedStatus, setSelectedStatus] = useState('Published');
   
@@ -706,185 +662,181 @@ const handleCloseCampaign = async (campaignId) => {
                 )}
               </div>
             ) : (
-              // Campaign cards with role-based aggregation
-              filteredCampaigns.map((campaign) => {
-                // Calculate role-based stats for this campaign
-                const roleBasedStats = calculateRoleBasedCampaignStats(campaign, userRole, userCampuses);
-                
-                return (
-                  <div key={campaign.id} className="campaign-card">
-                    {/* Campaign Header with Name and Menu */}
-                    <div className="campaign-card-header">
-                      <div className="campaign-card-title">
-                        <h3 
-                          onClick={() => navigate(`/campaign/${campaign.id}`)}
-                        >
-                          {campaign.name}
-                        </h3>
-                        <div className="campaign-header-badges">
-                          <span className="org-badge">
-                            {campaign.scope === 'Org' ? 'Org campaign' : 'Campus campaign'}
-                          </span>
-                          <span className={`status-badge ${
-                            campaign.startDate && new Date() >= new Date(campaign.startDate) ? 'live' : 'scheduled'
-                          }`}>
-                            {campaign.startDate && new Date() >= new Date(campaign.startDate) ? 'Live' : 'Scheduled'}
-                          </span>
-                          <span className={`status-badge ${campaign.status?.toLowerCase() || 'draft'}`}>
-                            {campaign.status || 'Draft'}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Menu Dropdown */}
-                      <div className="campaign-card-menu">
-                        <div className="menu-container">
-                          <button 
-                            className="menu-dots"
-                            onClick={() => setOpenDropdown(openDropdown === campaign.id ? null : campaign.id)}
-                          >
-                            ⋯
-                          </button>
-                          {openDropdown === campaign.id && (
-                            <div className="dropdown-menu">
-                              <div 
-                                className="dropdown-item"
-                                onClick={() => {
-                                  navigate(`/campaign/${campaign.id}`);
-                                  setOpenDropdown(null);
-                                }}
-                              >
-                                <span className="dropdown-icon">↗</span>
-                                View Details
-                              </div>
-                              <div className="dropdown-item">
-                                <span className="dropdown-icon">✏</span>
-                                Edit Campaign
-                              </div>
-                              <div className="dropdown-item">
-                                <span className="dropdown-icon">📋</span>
-                                Duplicate
-                              </div>
-                              <div 
-                                className={`dropdown-item ${campaign.status === 'Closed' ? 'disabled' : ''}`}
-                                style={{
-                                  opacity: campaign.status === 'Closed' ? 0.5 : 1,
-                                  cursor: campaign.status === 'Closed' ? 'not-allowed' : 'pointer',
-                                  pointerEvents: campaign.status === 'Closed' ? 'none' : 'auto'
-                                }}
-                                onClick={() => {
-                                  if (campaign.status !== 'Closed') {
-                                    setCampaignToClose(campaign);
-                                    setShowCloseModal(true);
-                                  }
-                                }}
-                              >
-                                <span className="dropdown-icon">✕</span>
-                                Close
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+              // Replace your existing campaign card mapping with this improved structure
 
-                    {/* Campaign Body */}
-                    <div className="campaign-card-body">
-                      {/* Main Stats Row - NOW USING ROLE-BASED STATS */}
-                      <div className="campaign-main-stats">
-                        <div className="main-stat-raised">
-                          <span className="label">Raised</span>
-                          <span className="value">${roleBasedStats.raised.toLocaleString()}</span>
-                        </div>
-                        
-                        <div className="secondary-stat">
-                          <span className="label">Pledged</span>
-                          <span className="value">${roleBasedStats.pledged.toLocaleString()}</span>
-                        </div>
-                        
-                        <div className="secondary-stat">
-                          <span className="label">Goal</span>
-                          <span className="value">${roleBasedStats.financialGoal.toLocaleString()}</span>
-                        </div>
-                      </div>
+filteredCampaigns.map((campaign) => (
+  <div key={campaign.id} className="campaign-card">
+    {/* NEW: Campaign Header with Name and Menu */}
+    <div className="campaign-card-header">
+      <div className="campaign-card-title">
+        <h3 
+          onClick={() => navigate(`/campaign/${campaign.id}`)}
+        >
+          {campaign.name}
+        </h3>
+        <div className="campaign-header-badges">
+          <span className="org-badge">
+            {campaign.scope === 'Org' ? 'Org campaign' : 'Campus campaign'}
+          </span>
+          <span className={`status-badge ${
+            campaign.startDate && new Date() >= new Date(campaign.startDate) ? 'live' : 'scheduled'
+          }`}>
+            {campaign.startDate && new Date() >= new Date(campaign.startDate) ? 'Live' : 'Scheduled'}
+          </span>
+          <span className={`status-badge ${campaign.status?.toLowerCase() || 'draft'}`}>
+            {campaign.status || 'Draft'}
+          </span>
+        </div>
+      </div>
+      
+      {/* Menu Dropdown */}
+      <div className="campaign-card-menu">
+        <div className="menu-container">
+          <button 
+            className="menu-dots"
+            onClick={() => setOpenDropdown(openDropdown === campaign.id ? null : campaign.id)}
+          >
+            ⋯
+          </button>
+          {openDropdown === campaign.id && (
+            <div className="dropdown-menu">
+              <div 
+                className="dropdown-item"
+                onClick={() => {
+                  navigate(`/campaign/${campaign.id}`);
+                  setOpenDropdown(null);
+                }}
+              >
+                <span className="dropdown-icon">↗</span>
+                View Details
+              </div>
+              <div className="dropdown-item">
+                <span className="dropdown-icon">✏</span>
+                Edit Campaign
+              </div>
+              <div className="dropdown-item">
+                <span className="dropdown-icon">📋</span>
+                Duplicate
+              </div>
+              <div 
+                className={`dropdown-item ${campaign.status === 'Closed' ? 'disabled' : ''}`}
+                style={{
+                  opacity: campaign.status === 'Closed' ? 0.5 : 1,
+                  cursor: campaign.status === 'Closed' ? 'not-allowed' : 'pointer',
+                  pointerEvents: campaign.status === 'Closed' ? 'none' : 'auto'
+                }}
+                onClick={() => {
+                  if (campaign.status !== 'Closed') {
+                    setCampaignToClose(campaign);
+                    setShowCloseModal(true);
+                  }
+                }}
+              >
+                <span className="dropdown-icon">✕</span>
+                Close
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
 
-                      {/* Enhanced Progress Bar - NOW USING ROLE-BASED STATS */}
-                      <div className="campaign-progress-container">
-                        <div className="campaign-progress-bar">
-                          {/* Pledged amount (light green background) */}
-                          <div 
-                            className="progress-fill-pledged"
-                            style={{
-                              width: roleBasedStats.financialGoal > 0 
-                                ? `${Math.min((roleBasedStats.pledged / roleBasedStats.financialGoal) * 100, 100)}%`
-                                : '0%'
-                            }}
-                          ></div>
-                          {/* Raised amount (dark green, on top) */}
-                          <div 
-                            className="progress-fill-raised"
-                            style={{
-                              width: roleBasedStats.financialGoal > 0 
-                                ? `${Math.min((roleBasedStats.raised / roleBasedStats.financialGoal) * 100, 100)}%`
-                                : '0%'
-                            }}
-                          ></div>
-                        </div>
-                        
-                        <div className="progress-labels">
-                          <span className="progress-percentage">
-                            {roleBasedStats.financialGoal > 0 
-                              ? `${Math.round((roleBasedStats.raised / roleBasedStats.financialGoal) * 100)}%`
-                              : '0%'
-                            }
-                          </span>
-                          <span className="goal-text">
-                            {roleBasedStats.financialGoal > 0 
-                              ? `${Math.round((roleBasedStats.pledged / roleBasedStats.financialGoal) * 100)}% pledged`
-                              : '0% pledged'
-                            }
-                          </span>
-                        </div>
-                      </div>
+    {/* NEW: Campaign Body */}
+    <div className="campaign-card-body">
+      {/* Main Stats Row */}
+      <div className="campaign-main-stats">
+        <div className="main-stat-raised">
+          <span className="label">Raised</span>
+          <span className="value">${campaign.raised?.toLocaleString() || '0'}</span>
+        </div>
+        
+        <div className="secondary-stat">
+          <span className="label">Pledged</span>
+          <span className="value">${campaign.pledged?.toLocaleString() || '0'}</span>
+        </div>
+        
+        <div className="secondary-stat">
+          <span className="label">Goal</span>
+          <span className="value">${campaign.financialGoal?.toLocaleString() || '0'}</span>
+        </div>
+       </div>
 
-                      {/* Campaign Footer */}
-                      <div className="campaign-card-footer">
-                        <span className="campaign-dates">
-                          {campaign.startDate && campaign.endDate 
-                            ? `Started ${new Date(campaign.startDate).toLocaleDateString('en-US', { 
-                                month: 'short', 
-                                day: 'numeric', 
-                                year: 'numeric' 
-                              })} • Ends ${new Date(campaign.endDate).toLocaleDateString('en-US', { 
-                                month: 'short', 
-                                day: 'numeric', 
-                                year: 'numeric' 
-                              })}`
-                            : 'Dates not set'
-                          }
-                        </span>
-                        <div className="campaign-actions">
-                          <button 
-                            className="action-btn"
-                            onClick={() => navigate('/add-pledge')}
-                          >
-                            🔗 Add pledge
-                          </button>
-                          <button 
-                            className="action-btn"
-                            onClick={() => {
-                              setCampaignToShare(campaign);
-                              setShowShareModal(true);
-                            }}
-                          >
-                            📤 Share
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
+      {/* Enhanced Progress Bar */}
+      <div className="campaign-progress-container">
+        <div className="campaign-progress-bar">
+          {/* Pledged amount (light green background) */}
+          <div 
+            className="progress-fill-pledged"
+            style={{
+              width: campaign.financialGoal > 0 
+                ? `${Math.min((campaign.pledged / campaign.financialGoal) * 100, 100)}%`
+                : '0%'
+            }}
+          ></div>
+          {/* Raised amount (dark green, on top) */}
+          <div 
+            className="progress-fill-raised"
+            style={{
+              width: campaign.financialGoal > 0 
+                ? `${Math.min((campaign.raised / campaign.financialGoal) * 100, 100)}%`
+                : '0%'
+            }}
+          ></div>
+        </div>
+        
+        <div className="progress-labels">
+          <span className="progress-percentage">
+            {campaign.financialGoal > 0 
+              ? `${Math.round((campaign.raised / campaign.financialGoal) * 100)}%`
+              : '0%'
+            }
+          </span>
+          <span className="goal-text">
+            {campaign.financialGoal > 0 
+              ? `${Math.round((campaign.pledged / campaign.financialGoal) * 100)}% pledged`
+              : '0% pledged'
+            }
+          </span>
+        </div>
+      </div>
+
+      {/* Campaign Footer */}
+      <div className="campaign-card-footer">
+        <span className="campaign-dates">
+          {campaign.startDate && campaign.endDate 
+            ? `Started ${new Date(campaign.startDate).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+              })} • Ends ${new Date(campaign.endDate).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+              })}`
+            : 'Dates not set'
+          }
+        </span>
+        <div className="campaign-actions">
+          <button 
+            className="action-btn"
+            onClick={() => navigate('/add-pledge')}
+          >
+            🔗 Add pledge
+          </button>
+          <button 
+            className="action-btn"
+            onClick={() => {
+              setCampaignToShare(campaign);
+              setShowShareModal(true);
+            }}
+          >
+            📤 Share
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+))
             )}
           </div>
         </div>

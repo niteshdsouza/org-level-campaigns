@@ -15,6 +15,12 @@ function AddPledge({ userRole, userCampuses }) {
   const [memberName, setMemberName] = useState('');
   const [pledgeAmount, setPledgeAmount] = useState('');
   const [pledgeDate, setPledgeDate] = useState('');
+  
+  // NEW: Pledge type and recurring fields
+  const [pledgeType, setPledgeType] = useState('One-time');
+  const [recurringFrequency, setRecurringFrequency] = useState('');
+  const [pledgeEndDate, setPledgeEndDate] = useState('');
+  
   const [selectedMember, setSelectedMember] = useState(null);
   const [memberSearchResults, setMemberSearchResults] = useState([]);
   const [showMemberDropdown, setShowMemberDropdown] = useState(false);
@@ -37,6 +43,64 @@ function AddPledge({ userRole, userCampuses }) {
   const [totalPledges, setTotalPledges] = useState(0);
   const pledgesPerPage = 20;
 
+  // Handle pledge type change
+  const handlePledgeTypeChange = (type) => {
+    setPledgeType(type);
+    // Reset recurring fields when switching to one-time
+    if (type === 'One-time') {
+      setRecurringFrequency('');
+      setPledgeEndDate('');
+    }
+  };
+
+  // Calculate number of periods between two dates
+  const calculatePeriods = (startDate, endDate, frequency) => {
+    if (!startDate || !endDate || !frequency) return 0;
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (end <= start) return 1; // Minimum 1 period
+    
+    let periods = 0;
+    
+    switch (frequency) {
+      case 'Monthly':
+        periods = (end.getFullYear() - start.getFullYear()) * 12 + 
+                 (end.getMonth() - start.getMonth());
+        break;
+      case 'Quarterly':
+        const quartersDiff = Math.floor(
+          ((end.getFullYear() - start.getFullYear()) * 12 + 
+           (end.getMonth() - start.getMonth())) / 3
+        );
+        periods = quartersDiff;
+        break;
+      case 'Annually':
+        periods = end.getFullYear() - start.getFullYear();
+        break;
+      default:
+        periods = 0;
+    }
+    
+    return Math.max(1, periods); // Minimum 1 period
+  };
+
+  // Calculate total pledge amount for recurring pledges
+  const calculateTotalAmount = () => {
+    if (pledgeType !== 'Recurring' || !pledgeAmount || !pledgeDate || !pledgeEndDate || !recurringFrequency) {
+      return null;
+    }
+    
+    const perPeriodAmount = parseFloat(pledgeAmount.replace(/[$,]/g, ''));
+    if (isNaN(perPeriodAmount)) return null;
+    
+    const periods = calculatePeriods(pledgeDate, pledgeEndDate, recurringFrequency);
+    return perPeriodAmount * periods;
+  };
+
+  const totalAmount = calculateTotalAmount();
+
   // Load campaigns and campuses from Airtable
   useEffect(() => {
     const loadData = async () => {
@@ -48,12 +112,13 @@ function AddPledge({ userRole, userCampuses }) {
         const today = new Date().toISOString().split('T')[0];
         setPledgeDate(today);
         
-        // Fetch both campaigns and campuses from Airtable
+        // Fetch both campaigns and campuses from Airtable FIRST
         const [campaignData, campusData] = await Promise.all([
           fetchCampaigns(),
           fetchCampuses()
         ]);
         
+        // Set campuses data immediately
         setCampuses(campusData);
         setLoadingCampuses(false);
         
@@ -79,14 +144,17 @@ function AddPledge({ userRole, userCampuses }) {
           return status === 'Published' || status === 'Draft';
         });
         
+        // Set campaigns data
         setCampaigns(statusFilteredCampaigns);
+        setLoadingCampaigns(false);
         
         // Auto-select first campaign if available
         if (statusFilteredCampaigns.length > 0) {
           setSelectedCampaign(statusFilteredCampaigns[0].id);
         }
         
-        // Load recent pledges
+        // FIXED: Load recent pledges AFTER campaigns and campuses are set
+        // This ensures the lookup will work properly
         await loadRecentPledges();
         
       } catch (error) {
@@ -129,19 +197,34 @@ function AddPledge({ userRole, userCampuses }) {
         maxRecords: pledgesPerPage,
         ...(offset > 0 && { offset: offset }) // Only add offset if > 0
       }).all();
-
+  
       console.log(`Loaded ${records.length} pledges for page ${page}`);
-
+  
+      // FIXED: Ensure we have fresh campaign and campus data
+      let currentCampaigns = campaigns;
+      let currentCampuses = campuses;
+      
+      // If campaigns or campuses are empty, fetch them fresh
+      if (campaigns.length === 0 || campuses.length === 0) {
+        console.log('Fetching fresh campaign and campus data...');
+        const [freshCampaigns, freshCampuses] = await Promise.all([
+          fetchCampaigns(),
+          fetchCampuses()
+        ]);
+        currentCampaigns = freshCampaigns;
+        currentCampuses = freshCampuses;
+      }
+  
       const pledgesData = records.map(record => {
         // Get linked record data
         const donorId = record.get('Donor')?.[0];
         const campaignId = record.get('Campaign')?.[0];
         const campusId = record.get('PledgeCampus')?.[0];
         
-        // Find the actual names from our loaded data
+        // Find the actual names from our current data
         const donor = donorId ? { id: donorId, name: 'Loading...', email: '' } : null;
-        const campaign = campaigns.find(c => c.id === campaignId);
-        const campus = campuses.find(c => c.id === campusId);
+        const campaign = currentCampaigns.find(c => c.id === campaignId);
+        const campus = currentCampuses.find(c => c.id === campusId);
         
         return {
           id: record.id,
@@ -151,10 +234,14 @@ function AddPledge({ userRole, userCampuses }) {
           campus: campus ? campus.name : 'Unknown Campus',
           amount: record.get('Amount') || 0,
           pledgeDate: record.get('PledgeDate') || '',
-          notes: record.get('Notes') || ''
+          notes: record.get('Notes') || '',
+          // NEW: Include the new fields in the display
+          pledgeType: record.get('PledgeType') || 'One-time',
+          recurringFrequency: record.get('RecurringFrequency') || '',
+          pledgeEndDate: record.get('PledgeEndDate') || ''
         };
       });
-
+  
       // Now fetch donor details for each pledge
       const pledgesWithDonors = await Promise.all(
         pledgesData.map(async (pledge) => {
@@ -177,7 +264,7 @@ function AddPledge({ userRole, userCampuses }) {
           return pledge;
         })
       );
-
+  
       setRecentPledges(pledgesWithDonors);
       setPledgesCurrentPage(page);
       
@@ -424,16 +511,29 @@ function AddPledge({ userRole, userCampuses }) {
   // Create pledge in Airtable
   const createPledge = async (pledgeData) => {
     try {
+      // Build the fields object with new fields
+      const fields = {
+        'Donor': [pledgeData.donorId], // Array for linked record
+        'PledgeCampus': [pledgeData.campusId], // Array for linked record
+        'Campaign': [pledgeData.campaignId], // Array for linked record
+        'Amount': pledgeData.amount,
+        'PledgeDate': pledgeData.pledgeDate,
+        'Notes': pledgeData.notes || '',
+        // NEW: Add the new fields
+        'PledgeType': pledgeData.pledgeType,
+      };
+
+      // Only add recurring fields if pledge type is recurring
+      if (pledgeData.pledgeType === 'Recurring') {
+        fields['RecurringFrequency'] = pledgeData.recurringFrequency;
+        if (pledgeData.pledgeEndDate) {
+          fields['PledgeEndDate'] = pledgeData.pledgeEndDate;
+        }
+      }
+
       const record = await tables.pledges.create([
         {
-          fields: {
-            'Donor': [pledgeData.donorId], // Array for linked record
-            'PledgeCampus': [pledgeData.campusId], // Array for linked record
-            'Campaign': [pledgeData.campaignId], // Array for linked record
-            'Amount': pledgeData.amount,
-            'PledgeDate': pledgeData.pledgeDate,
-            'Notes': pledgeData.notes || ''
-          }
+          fields: fields
         }
       ]);
 
@@ -449,15 +549,32 @@ function AddPledge({ userRole, userCampuses }) {
   // Update existing pledge
   const updatePledge = async (pledgeId, pledgeData) => {
     try {
+      // Build the fields object with new fields
+      const fields = {
+        'Amount': pledgeData.amount,
+        'PledgeDate': pledgeData.pledgeDate,
+        'PledgeCampus': [pledgeData.campusId], // Update campus if changed
+        'Notes': pledgeData.notes || '',
+        // NEW: Add the new fields
+        'PledgeType': pledgeData.pledgeType,
+      };
+
+      // Only add recurring fields if pledge type is recurring
+      if (pledgeData.pledgeType === 'Recurring') {
+        fields['RecurringFrequency'] = pledgeData.recurringFrequency;
+        if (pledgeData.pledgeEndDate) {
+          fields['PledgeEndDate'] = pledgeData.pledgeEndDate;
+        }
+      } else {
+        // Clear recurring fields if switching to one-time
+        fields['RecurringFrequency'] = null;
+        fields['PledgeEndDate'] = null;
+      }
+
       const record = await tables.pledges.update([
         {
           id: pledgeId,
-          fields: {
-            'Amount': pledgeData.amount,
-            'PledgeDate': pledgeData.pledgeDate,
-            'PledgeCampus': [pledgeData.campusId], // Update campus if changed
-            'Notes': pledgeData.notes || ''
-          }
+          fields: fields
         }
       ]);
 
@@ -475,6 +592,18 @@ function AddPledge({ userRole, userCampuses }) {
     if (!selectedMember || !selectedCampaign || !selectedCampus || !pledgeAmount || !pledgeDate) {
       alert('Please fill in all required fields');
       return;
+    }
+
+    // Validate recurring pledge fields
+    if (pledgeType === 'Recurring') {
+      if (!recurringFrequency) {
+        alert('Please select a recurring frequency');
+        return;
+      }
+      if (!pledgeEndDate) {
+        alert('Please select an end date for recurring pledges');
+        return;
+      }
     }
 
     try {
@@ -504,13 +633,25 @@ function AddPledge({ userRole, userCampuses }) {
   // Create new pledge
   const createNewPledge = async () => {
     try {
+      // Calculate final amount to store
+      let finalAmount;
+      if (pledgeType === 'Recurring' && totalAmount) {
+        finalAmount = totalAmount; // Store calculated total
+      } else {
+        finalAmount = parseFloat(pledgeAmount.replace(/[$,]/g, '')); // Store entered amount for one-time
+      }
+
       const pledgeData = {
         donorId: selectedMember.id,
         campusId: selectedCampus,
         campaignId: selectedCampaign,
-        amount: parseFloat(pledgeAmount.replace(/[$,]/g, '')),
+        amount: finalAmount,
         pledgeDate: pledgeDate,
-        notes: ''
+        notes: '',
+        // NEW: Include the new fields
+        pledgeType: pledgeType,
+        recurringFrequency: pledgeType === 'Recurring' ? recurringFrequency : null,
+        pledgeEndDate: pledgeType === 'Recurring' && pledgeEndDate ? pledgeEndDate : null
       };
 
       await createPledge(pledgeData);
@@ -535,11 +676,23 @@ function AddPledge({ userRole, userCampuses }) {
     try {
       setIsUpdatingPledge(true);
 
+      // Calculate final amount to store
+      let finalAmount;
+      if (pledgeType === 'Recurring' && totalAmount) {
+        finalAmount = totalAmount; // Store calculated total
+      } else {
+        finalAmount = parseFloat(pledgeAmount.replace(/[$,]/g, '')); // Store entered amount for one-time
+      }
+
       const pledgeData = {
         campusId: selectedCampus,
-        amount: parseFloat(pledgeAmount.replace(/[$,]/g, '')),
+        amount: finalAmount,
         pledgeDate: pledgeDate,
-        notes: ''
+        notes: '',
+        // NEW: Include the new fields
+        pledgeType: pledgeType,
+        recurringFrequency: pledgeType === 'Recurring' ? recurringFrequency : null,
+        pledgeEndDate: pledgeType === 'Recurring' && pledgeEndDate ? pledgeEndDate : null
       };
 
       await updatePledge(existingPledge.id, pledgeData);
@@ -612,6 +765,10 @@ function AddPledge({ userRole, userCampuses }) {
     setSelectedCampus('');
     setPledgeAmount('');
     setPledgeDate(new Date().toISOString().split('T')[0]); // Reset to today
+    // NEW: Reset the new fields
+    setPledgeType('One-time');
+    setRecurringFrequency('');
+    setPledgeEndDate('');
     setMemberSearchResults([]);
     setShowMemberDropdown(false);
     if (campaigns.length > 0) {
@@ -765,27 +922,103 @@ function AddPledge({ userRole, userCampuses }) {
             </div>
           </div>
 
-          {/* Pledge Amount */}
+          {/* NEW: Giving Frequency (Pledge Type) with inline Recurring Frequency */}
           <div className="form-group">
-            <label className="form-label">Pledge Amount</label>
-            <input
-              type="text"
-              className="pledge-amount-input"
-              placeholder="$0"
-              value={pledgeAmount}
-              onChange={handlePledgeAmountChange}
-            />
+            <label className="form-label">Giving frequency</label>
+            <div className="giving-frequency-container">
+              <div className="pledge-type-options">
+                <div className="radio-group">
+                  <label className="radio-option">
+                    <input
+                      type="radio"
+                      name="pledgeType"
+                      value="One-time"
+                      checked={pledgeType === 'One-time'}
+                      onChange={(e) => handlePledgeTypeChange(e.target.value)}
+                    />
+                    <span className="radio-label">One time</span>
+                  </label>
+                  <label className="radio-option">
+                    <input
+                      type="radio"
+                      name="pledgeType"
+                      value="Recurring"
+                      checked={pledgeType === 'Recurring'}
+                      onChange={(e) => handlePledgeTypeChange(e.target.value)}
+                    />
+                    <span className="radio-label">Recurring</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* NEW: Recurring Frequency inline */}
+              {pledgeType === 'Recurring' && (
+                <div className="recurring-frequency-inline">
+                  <div className="select-wrapper">
+                    <select 
+                      className="recurring-frequency-select"
+                      value={recurringFrequency}
+                      onChange={(e) => setRecurringFrequency(e.target.value)}
+                    >
+                      <option value="">Select frequency</option>
+                      <option value="Monthly">Monthly</option>
+                      <option value="Quarterly">Quarterly</option>
+                      <option value="Annually">Annually</option>
+                    </select>
+                    <span className="select-arrow">▼</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Pledge Date */}
+          {/* Pledge Amount with Total Display */}
           <div className="form-group">
-            <label className="form-label">Pledge Date</label>
-            <input
-              type="date"
-              className="pledge-date-input"
-              value={pledgeDate}
-              onChange={(e) => setPledgeDate(e.target.value)}
-            />
+            <label className="form-label">Pledge Amount</label>
+            <div className="pledge-amount-container">
+              <input
+                type="text"
+                className="pledge-amount-input"
+                placeholder="$0"
+                value={pledgeAmount}
+                onChange={handlePledgeAmountChange}
+              />
+              {/* Show calculated total for recurring pledges */}
+              {pledgeType === 'Recurring' && totalAmount && (
+                <div className="total-amount-display">
+                  (${totalAmount.toLocaleString()} total)
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Pledge Date with inline End Date */}
+          <div className="form-group">
+            <div className="pledge-date-container">
+              <div className="pledge-date-section">
+                <label className="inline-label">Pledge Date</label>
+                <input
+                  type="date"
+                  className="pledge-date-input"
+                  value={pledgeDate}
+                  onChange={(e) => setPledgeDate(e.target.value)}
+                />
+              </div>
+
+              {/* NEW: End Date inline */}
+              {pledgeType === 'Recurring' && (
+                <div className="end-date-inline">
+                  <label className="inline-label">End date</label>
+                  <input
+                    type="date"
+                    className="pledge-end-date-input"
+                    value={pledgeEndDate}
+                    onChange={(e) => setPledgeEndDate(e.target.value)}
+                    min={pledgeDate} // Ensure end date is after start date
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Action Buttons */}
@@ -794,8 +1027,8 @@ function AddPledge({ userRole, userCampuses }) {
               Reset
             </button>
             <button 
-              className={`btn-add-pledge ${(memberName.trim() || selectedMember) && selectedCampaign && selectedCampus && pledgeAmount && pledgeDate ? 'enabled' : 'disabled'}`}
-              disabled={!(memberName.trim() || selectedMember) || !selectedCampaign || !selectedCampus || !pledgeAmount || !pledgeDate || isCreatingPledge}
+              className={`btn-add-pledge ${(memberName.trim() || selectedMember) && selectedCampaign && selectedCampus && pledgeAmount && pledgeDate && (pledgeType === 'One-time' || (recurringFrequency && pledgeEndDate)) ? 'enabled' : 'disabled'}`}
+              disabled={!(memberName.trim() || selectedMember) || !selectedCampaign || !selectedCampus || !pledgeAmount || !pledgeDate || (pledgeType === 'Recurring' && (!recurringFrequency || !pledgeEndDate)) || isCreatingPledge}
               onClick={handleAddPledge}
             >
               {isCreatingPledge ? (
@@ -840,6 +1073,7 @@ function AddPledge({ userRole, userCampuses }) {
                         <th>Date pledged</th>
                         <th>Campaign name</th>
                         <th>Campus</th>
+                        <th>Type</th>
                         <th>Total pledged</th>
                         <th></th>
                       </tr>
@@ -847,7 +1081,7 @@ function AddPledge({ userRole, userCampuses }) {
                     <tbody>
                       {recentPledges.length === 0 ? (
                         <tr>
-                          <td colSpan="7" className="no-pledges-message">
+                          <td colSpan="8" className="no-pledges-message">
                             No pledges found in the last 30 days
                           </td>
                         </tr>
@@ -872,6 +1106,15 @@ function AddPledge({ userRole, userCampuses }) {
                             </td>
                             <td className="campaign-cell">{pledge.campaign}</td>
                             <td className="campus-cell">{pledge.campus}</td>
+                            <td className="type-cell">
+                              <span className={`pledge-type-badge ${pledge.pledgeType?.toLowerCase()}`}>
+                                {pledge.pledgeType === 'Recurring' ? (
+                                  `${pledge.pledgeType} (${pledge.recurringFrequency || 'Unknown'})`
+                                ) : (
+                                  pledge.pledgeType || 'One-time'
+                                )}
+                              </span>
+                            </td>
                             <td className="amount-cell">
                               ${typeof pledge.amount === 'number' ? pledge.amount.toFixed(2) : '0.00'}
                             </td>
@@ -1019,7 +1262,12 @@ function AddPledge({ userRole, userCampuses }) {
                 <div className="new-pledge">
                   <h4>New Amount:</h4>
                   <div className="pledge-details">
-                    <span className="amount">{pledgeAmount}</span>
+                    <span className="amount">
+                      {pledgeType === 'Recurring' && totalAmount 
+                        ? `${totalAmount.toLocaleString()}` 
+                        : pledgeAmount
+                      }
+                    </span>
                     <span className="date">{new Date(pledgeDate).toLocaleDateString()}</span>
                   </div>
                 </div>
