@@ -1,586 +1,1151 @@
-/* PledgePage.css - Clean full-width responsive design */
+/* PledgePage.css - Light theme with app consistency */
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  .pledge-page {
-    min-height: 100vh;
-    width: 100vw;
-    background: #000;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    overflow-x: hidden;
-  }
-  
-  /* Header */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.pledge-page {
+  min-height: 100vh;
+  width: 100vw;
+  background: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Header - Light theme */
+.pledge-header {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 24px;
+  width: 100%;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-circle {
+  width: 40px;
+  height: 40px;
+  background: #10b981;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-icon {
+  font-size: 20px;
+  color: white;
+}
+
+.org-name {
+  color: #1a1a1a;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.language-link,
+.account-link {
+  color: #6b7280;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.language-link:hover,
+.account-link:hover {
+  color: #10b981;
+}
+
+.account-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Hero Section - Light theme with green gradient */
+.pledge-hero {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  width: 100vw;
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  padding: 20px 20px 120px;
+  position: relative;
+}
+
+.hero-content {
+  width: 100%;
+  max-width: 800px;
+}
+
+.campaign-title {
+  font-size: 24px;
+  font-weight: 400;
+  margin-bottom: 6px;
+  opacity: 0.95;
+}
+
+.campus-subtitle {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.pledge-heading {
+  font-size: 40px;
+  font-weight: 300;
+  margin-bottom: 40px;
+  color: white;
+}
+
+/* Amount Display */
+.amount-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 8px;
+  gap: 2px;
+}
+
+.currency {
+  font-size: 60px;
+  font-weight: 300;
+  color: white;
+}
+
+.amount-input-large {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 100px;
+  font-weight: 300;
+  text-align: center;
+  width: auto;
+  min-width: 320px;
+  max-width: 380px;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+
+/* Hide number input spinners completely */
+.amount-input-large::-webkit-outer-spin-button,
+.amount-input-large::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+  display: none;
+}
+
+.amount-input-large::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.amount-input-large:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.amount-label {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+}
+
+/* Content Card - Clean white design */
+.content-card {
+  background: white;
+  width: calc(100vw - 40px);
+  max-width: 650px;
+  margin: -120px auto 0;
+  border-radius: 16px;
+  position: relative;
+  z-index: 10;
+  min-height: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.card-content {
+  padding: 30px;
+  width: 100%;
+}
+
+/* Campaign Section */
+.campaign-section {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.campaign-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.campaign-section p {
+  color: #6b7280;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+/* Form */
+.pledge-form-new {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-section {
+  margin-bottom: 24px;
+}
+
+.form-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* Pledge Type Buttons - Consistent with app design */
+.pledge-type-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.type-btn {
+  padding: 14px 18px;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.type-btn:hover {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.type-btn.active {
+  border-color: #10b981;
+  background: #10b981;
+  color: white;
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+/* Date Fields */
+.date-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.date-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.date-field input {
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s ease;
+  color: #374151;
+  font-family: inherit;
+  width: 100%;
+}
+
+.date-field input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Date input styling */
+.date-field input[type="date"] {
+  color: #374151;
+  background: white;
+}
+
+.date-field input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 16px;
+  background: white;
+  transition: border-color 0.2s ease;
+  color: #374151;
+  font-family: inherit;
+}
+
+.form-group input::placeholder {
+  color: #9ca3af;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  color: #374151;
+}
+
+/* Submit Button - App consistent styling */
+.next-btn {
+  width: 100%;
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 24px;
+}
+
+.next-btn:hover:not(:disabled) {
+  background: #059669;
+}
+
+.next-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #e5e7eb;
+  color: #9ca3af;
+}
+
+/* Personal Details Step Styles */
+.personal-details-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.personal-details-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.personal-details-header p {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Pledge Summary */
+.pledge-summary {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.summary-item:last-child {
+  margin-bottom: 0;
+}
+
+.summary-label {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 600;
+}
+
+/* Personal Details Form */
+.personal-details-form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Step 2 Actions */
+.step2-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.back-btn {
+  flex: 1;
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 16px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  border-color: #9ca3af;
+  background: #f9fafb;
+}
+
+.step2-actions .next-btn {
+  flex: 2;
+  margin-top: 0;
+}
+
+/* Success State in Content Card */
+.success-content {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.success-icon-large {
+  font-size: 64px;
+  margin-bottom: 24px;
+  display: block;
+}
+
+.success-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+.success-message {
+  font-size: 16px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.success-message strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+/* Step 4: Payment Method Styles */
+.payment-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.payment-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.payment-method-section {
+  margin-bottom: 24px;
+}
+
+.payment-dropdown {
+  width: 100%;
+}
+
+.payment-select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.payment-select:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.gift-type-section {
+  margin-bottom: 24px;
+}
+
+.gift-type-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.gift-type-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.gift-type-btn {
+  padding: 16px 18px;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.gift-type-btn:hover {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.gift-type-btn.active {
+  border-color: #10b981;
+  background: #10b981;
+  color: white;
+}
+
+.gift-icon {
+  font-size: 16px;
+}
+
+.fund-section {
+  margin-bottom: 32px;
+}
+
+.fund-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.fund-display {
+  font-size: 16px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.payment-method-card {
+  margin-bottom: 32px;
+}
+
+.payment-method-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+.selected-payment-method {
+  margin-bottom: 16px;
+}
+
+.payment-card {
+  border: 2px solid #10b981;
+  border-radius: 12px;
+  padding: 16px;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-info {
+  flex: 1;
+}
+
+.card-type {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.card-number {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+.card-expiry {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.selected-indicator {
+  width: 24px;
+  height: 24px;
+  background: #10b981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.visa-logo {
+  font-size: 14px;
+  font-weight: bold;
+  color: #1a365d;
+  background: linear-gradient(45deg, #1e3a8a, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.add-payment-method {
+  width: 100%;
+  padding: 16px;
+  border: 2px dashed #d1d5db;
+  background: white;
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: not-allowed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0.6;
+}
+
+.plus-icon {
+  font-size: 18px;
+  color: #9ca3af;
+}
+
+.payment-actions {
+  margin-bottom: 24px;
+}
+
+.process-payment-btn {
+  width: 100%;
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 18px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.process-payment-btn:hover:not(:disabled) {
+  background: #059669;
+}
+
+.process-payment-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Duplicate Pledge Error Message */
+.duplicate-pledge-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.error-icon-small {
+  font-size: 20px;
+  color: #ef4444;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.error-content {
+  flex: 1;
+}
+
+.error-content h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ef4444;
+  margin-bottom: 8px;
+}
+
+.error-content p {
+  font-size: 14px;
+  color: #7f1d1d;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.dismiss-error-btn {
+  background: none;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dismiss-error-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* Step 3: Confirmation Page Styles */
+.confirmation-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.confirmation-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.confirmation-header p {
+  color: #6b7280;
+  font-size: 16px;
+  margin: 0;
+}
+
+.confirmation-amount {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.conf-currency {
+  font-size: 40px;
+  font-weight: 300;
+  color: #374151;
+  margin-right: 4px;
+}
+
+.conf-amount {
+  font-size: 48px;
+  font-weight: 300;
+  color: #374151;
+  line-height: 1;
+}
+
+.confirmation-campaign {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.confirmation-campaign p {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.confirmation-campaign strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+.change-details-btn {
+  background: none;
+  border: none;
+  color: #10b981;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto;
+  padding: 4px 0;
+  transition: color 0.2s ease;
+}
+
+.change-details-btn:hover {
+  color: #059669;
+  text-decoration: underline;
+}
+
+.confirmation-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pledge-pay-btn {
+  width: 100%;
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 18px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pledge-pay-btn:hover:not(:disabled) {
+  background: #059669;
+}
+
+.pledge-pay-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pledge-only-btn {
+  width: 100%;
+  background: white;
+  color: #10b981;
+  border: 2px solid #10b981;
+  padding: 16px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pledge-only-btn:hover:not(:disabled) {
+  background: #f0fdf4;
+}
+
+.pledge-only-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Form Footer */
+.form-footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 40px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.legal-text {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.legal-text a {
+  color: #10b981;
+  text-decoration: none;
+}
+
+.legal-text a:hover {
+  text-decoration: underline;
+}
+
+.org-info {
+  font-size: 11px;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+/* Loading, Error, Success States */
+.loading-state,
+.error-state,
+.success-state {
+  text-align: center;
+  padding: 80px 40px;
+  color: #374151;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-state p,
+.error-state p,
+.success-state p {
+  color: #6b7280;
+  font-size: 16px;
+  margin: 12px 0;
+  line-height: 1.5;
+}
+
+.error-icon,
+.success-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #10b981;
+}
+
+.error-state .error-icon {
+  color: #ef4444;
+}
+
+.error-state h2,
+.success-state h2 {
+  color: #374151;
+  font-size: 26px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+/* Page Background - Light theme */
+.pledge-page::after {
+  content: '';
+  display: block;
+  background: #f8f9fa;
+  min-height: 300px;
+  width: 100vw;
+  position: relative;
+  z-index: 1;
+}
+
+/* Pushpay Footer */
+.pushpay-footer {
+  background: #f8f9fa;
+  padding: 40px 20px 20px;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+  margin-top: 60px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pushpay-footer .footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 650px;
+  margin: 0 auto;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pushpay-logo {
+  opacity: 0.7;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
   .pledge-header {
-    background: rgba(0, 0, 0, 0.9);
-    padding: 16px 24px;
-    width: 100%;
-  }
-  
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  
-  .logo-section {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .logo-circle {
-    width: 40px;
-    height: 40px;
-    background: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .logo-icon {
-    font-size: 20px;
-    color: #000;
+    padding: 16px 20px;
   }
   
   .org-name {
-    color: white;
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 1px;
+    font-size: 16px;
   }
   
   .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 24px;
+    gap: 16px;
   }
   
-  .language-link,
-  .account-link {
-    color: white;
-    font-size: 14px;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  
-  .account-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  /* Hero Section - Full Width */
   .pledge-hero {
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 800"><rect width="1920" height="800" fill="%23222"/><circle cx="400" cy="300" r="120" fill="%23444" opacity="0.3"/><circle cx="1200" cy="500" r="180" fill="%23444" opacity="0.2"/></svg>');
-    background-size: cover;
-    background-position: center;
-    width: 100vw;
-    min-height: 55vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: white;
-    padding: 20px 20px 80px;
-    position: relative;
-  }
-  
-  .hero-content {
-    width: 100%;
-    max-width: 800px;
-  }
-  
-  .campaign-title {
-    font-size: 24px;
-    font-weight: 400;
-    margin-bottom: 6px;
-    opacity: 0.9;
+    min-height: 60vh;
+    padding: 30px 20px 140px;
   }
   
   .campus-subtitle {
     font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 30px;
-    color: white;
   }
   
   .pledge-heading {
     font-size: 40px;
-    font-weight: 300;
     margin-bottom: 40px;
-    color: white;
-  }
-  
-  /* Amount Display */
-  .amount-display {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    margin-bottom: 8px;
-    gap: 2px;
   }
   
   .currency {
     font-size: 60px;
-    font-weight: 300;
-    color: white;
   }
   
   .amount-input-large {
-    background: transparent;
-    border: none;
-    color: white;
     font-size: 100px;
-    font-weight: 300;
-    text-align: center;
-    width: auto;
-    min-width: 320px;
-    max-width: 380px;
-    outline: none;
-    -webkit-appearance: none;
-    -moz-appearance: textfield;
+    min-width: 250px;
   }
   
-  /* Hide number input spinners completely */
-  .amount-input-large::-webkit-outer-spin-button,
-  .amount-input-large::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-    display: none;
-  }
-  
-  .amount-input-large::placeholder {
-    color: rgba(255, 255, 255, 0.7);
-  }
-  
-  .amount-label {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 400;
-  }
-  
-  /* Content Card - Overlapping the hero */
   .content-card {
-    background: white;
-    width: calc(100vw - 40px);
-    max-width: 650px;
-    margin: -60px auto 0;
-    border-radius: 16px;
-    position: relative;
-    z-index: 10;
-    min-height: 500px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: calc(100vw - 20px);
+    margin: -140px auto 0;
   }
   
   .card-content {
-    padding: 30px;
-    width: 100%;
+    padding: 30px 25px;
   }
   
-  /* Campaign Section */
-  .campaign-section {
-    margin-bottom: 30px;
-    text-align: center;
-  }
-  
-  .campaign-section h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #6b7280;
-    margin-bottom: 12px;
-  }
-  
-  .campaign-section p {
-    color: #6b7280;
-    line-height: 1.5;
-    font-size: 14px;
-  }
-  
-  /* Form */
-  .pledge-form-new {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  
-  .form-section {
-    margin-bottom: 24px;
-  }
-  
-  .form-section h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 16px;
-    text-align: center;
-  }
-  
-  /* Pledge Type Buttons */
   .pledge-type-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 12px;
-    margin-bottom: 20px;
   }
   
-  .type-btn {
-    padding: 14px 18px;
-    border: 2px solid #e5e7eb;
-    background: white;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #374151;
-  }
-  
-  .type-btn:hover {
-    border-color: #2dd4bf;
-    background: #f0fdfa;
-  }
-  
-  .type-btn.active {
-    border-color: #2dd4bf;
-    background: #2dd4bf;
-    color: white;
-  }
-  
-  .btn-icon {
-    font-size: 16px;
-  }
-  
-  /* Date Fields */
   .date-fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 16px;
   }
   
-  .date-field {
-    display: flex;
+  .step2-actions {
     flex-direction: column;
   }
   
-  .date-field label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 6px;
-  }
-  
-  .date-field input {
-    padding: 12px 14px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    background: white;
-    transition: border-color 0.2s ease;
-    color: #374151;
-    font-family: inherit;
-    width: 100%;
-  }
-  
-  .date-field input:focus {
-    outline: none;
-    border-color: #2dd4bf;
-    box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
-  }
-  
-  /* Simple date input styling that works */
-  .date-field input[type="date"] {
-    color: #374151;
-    background: white;
-  }
-  
-  .date-field input[type="date"]::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-  }
-  
-  /* Form Groups */
-  .form-group {
-    margin-bottom: 20px;
-  }
-  
-  .form-group label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 8px;
-  }
-  
-  .form-group input {
-    width: 100%;
-    padding: 14px 16px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 16px;
-    background: white;
-    transition: border-color 0.2s ease;
-    color: #374151;
-    font-family: inherit;
-  }
-  
-  .form-group input::placeholder {
-    color: #9ca3af;
-  }
-  
-  .form-group input:focus {
-    outline: none;
-    border-color: #2dd4bf;
-    box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
-    color: #374151;
-  }
-  
-  /* Submit Button */
-  .next-btn {
-    width: 100%;
-    background: #2dd4bf;
-    color: white;
-    border: none;
-    padding: 18px 24px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 24px;
-  }
-  
-  .next-btn:hover:not(:disabled) {
-    background: #14b8a6;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(45, 212, 191, 0.3);
-  }
-  
-  .next-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  
-  /* Form Footer */
-  .form-footer {
-    text-align: center;
-    margin-top: 40px;
-    padding-top: 40px;
-    border-top: 1px solid #f3f4f6;
-  }
-  
-  .legal-text {
-    font-size: 12px;
-    color: #6b7280;
-    margin-bottom: 8px;
-  }
-  
-  .legal-text a {
-    color: #2dd4bf;
-    text-decoration: none;
-  }
-  
-  .legal-text a:hover {
-    text-decoration: underline;
-  }
-  
-  .org-info {
-    font-size: 11px;
-    color: #9ca3af;
-    line-height: 1.4;
-  }
-  
-  /* Loading, Error, Success States */
-  .loading-state,
-  .error-state,
-  .success-state {
-    text-align: center;
-    padding: 80px 40px;
-    color: white;
-  }
-  
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  .loading-state p,
-  .error-state p,
-  .success-state p {
-    color: white;
-    font-size: 16px;
-    margin: 12px 0;
-    line-height: 1.5;
-  }
-  
-  .error-icon,
-  .success-icon {
-    font-size: 48px;
-    margin-bottom: 20px;
-  }
-  
-  .error-state h2,
-  .success-state h2 {
-    color: white;
-    font-size: 26px;
-    margin-bottom: 16px;
-    font-weight: 600;
-  }
-  
-  /* Page Background - continues after card */
-  .pledge-page::after {
-    content: '';
-    display: block;
-    background: #f5f5f5;
-    min-height: 300px;
-    width: 100vw;
-    position: relative;
-    z-index: 1;
-  }
-  
-  /* Pushpay Footer */
-  .pushpay-footer {
-    background: #f5f5f5;
-    padding: 40px 20px 20px;
-    text-align: center;
-    position: relative;
-    z-index: 5;
-    margin-top: 60px;
+  .step2-actions .next-btn {
+    flex: none;
   }
   
   .pushpay-footer .footer-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 650px;
-    margin: 0 auto;
-    font-size: 12px;
-    color: #6b7280;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pledge-header {
+    padding: 12px 16px;
   }
   
-  .pushpay-logo {
-    opacity: 0.6;
-    font-size: 12px;
-    color: #9ca3af;
+  .campus-subtitle {
+    font-size: 24px;
   }
   
-  /* Mobile Responsive */
-  @media (max-width: 768px) {
-    .pledge-header {
-      padding: 16px 20px;
-    }
-    
-    .org-name {
-      font-size: 16px;
-    }
-    
-    .header-actions {
-      gap: 16px;
-    }
-    
-    .pledge-hero {
-      min-height: 65vh;
-      padding: 30px 20px 100px;
-    }
-    
-    .campus-subtitle {
-      font-size: 28px;
-    }
-    
-    .pledge-heading {
-      font-size: 40px;
-      margin-bottom: 40px;
-    }
-    
-    .currency {
-      font-size: 60px;
-    }
-    
-    .amount-input-large {
-      font-size: 100px;
-      min-width: 250px;
-    }
-    
-    .content-card {
-      width: calc(100vw - 20px);
-      margin: -80px auto 0;
-    }
-    
-    .card-content {
-      padding: 30px 25px;
-    }
-    
-    .pledge-type-buttons {
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    
-    .date-fields {
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    
-    .pushpay-footer .footer-content {
-      flex-direction: column;
-      gap: 12px;
-    }
+  .pledge-heading {
+    font-size: 32px;
   }
   
-  @media (max-width: 480px) {
-    .pledge-header {
-      padding: 12px 16px;
-    }
-    
-    .campus-subtitle {
-      font-size: 24px;
-    }
-    
-    .pledge-heading {
-      font-size: 32px;
-    }
-    
-    .currency {
-      font-size: 50px;
-    }
-    
-    .amount-input-large {
-      font-size: 80px;
-      min-width: 200px;
-    }
-    
-    .content-card {
-      width: calc(100vw - 16px);
-      margin: -60px auto 0;
-    }
-    
-    .card-content {
-      padding: 25px 20px;
-    }
-    
-    .type-btn {
-      padding: 16px 20px;
-      font-size: 15px;
-    }
+  .currency {
+    font-size: 50px;
   }
+  
+  .amount-input-large {
+    font-size: 80px;
+    min-width: 200px;
+  }
+  
+  .content-card {
+    width: calc(100vw - 16px);
+    margin: -100px auto 0;
+  }
+  
+  .card-content {
+    padding: 25px 20px;
+  }
+  
+  .type-btn {
+    padding: 16px 20px;
+    font-size: 15px;
+  }
+}

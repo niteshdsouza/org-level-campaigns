@@ -541,3 +541,191 @@ export const updateCampaignStatus = async (campaignId, newStatus) => {
       throw error;
     }
   };
+
+ // Add this function to your existing airtable.js file
+
+// Check if a pledge already exists for this donor, campaign, and campus
+export const checkExistingPledge = async (donorEmail, campaignId, campusId) => {
+  try {
+    console.log('Checking for existing pledge:', { donorEmail, campaignId, campusId });
+    
+    // First, find the donor by email
+    const donorRecords = await tables.people.select({
+      filterByFormula: `{Email} = "${donorEmail}"`
+    }).all();
+    
+    if (donorRecords.length === 0) {
+      console.log('✅ No existing donor found, pledge check passed');
+      return { exists: false };
+    }
+    
+    const donorId = donorRecords[0].id;
+    console.log('Found donor ID:', donorId);
+    
+    // Get all pledges and filter manually for more reliable checking
+    const allPledges = await tables.pledges.select({
+      view: 'Grid view'
+    }).all();
+    
+    // Filter pledges manually to find matches
+    const existingPledges = allPledges.filter(pledgeRecord => {
+      const pledgeDonorIds = pledgeRecord.get('Donor') || [];
+      const pledgeCampaignIds = pledgeRecord.get('Campaign') || [];
+      const pledgeCampusIds = pledgeRecord.get('PledgeCampus') || [];
+      
+      console.log('Checking pledge:', {
+        pledgeId: pledgeRecord.id,
+        pledgeDonorIds,
+        pledgeCampaignIds,
+        pledgeCampusIds,
+        lookingFor: { donorId, campaignId, campusId }
+      });
+      
+      const donorMatch = pledgeDonorIds.includes(donorId);
+      const campaignMatch = pledgeCampaignIds.includes(campaignId);
+      const campusMatch = pledgeCampusIds.includes(campusId);
+      
+      return donorMatch && campaignMatch && campusMatch;
+    });
+    
+    if (existingPledges.length > 0) {
+      const existingPledge = existingPledges[0];
+      console.log('❌ Existing pledge found:', existingPledge.id);
+      
+      return {
+        exists: true,
+        pledgeId: existingPledge.id,
+        amount: existingPledge.get('Amount'),
+        type: existingPledge.get('PledgeType'),
+        date: existingPledge.get('PledgeDate')
+      };
+    }
+    
+    console.log('✅ No existing pledge found, validation passed');
+    return { exists: false };
+    
+  } catch (error) {
+    console.error('❌ Error checking existing pledge:', error);
+    // If there's an error checking, allow the pledge to proceed
+    return { exists: false };
+  }
+};
+
+// Create or find a donor in the People table, then create a pledge
+export const createPledge = async (pledgeData) => {
+  try {
+    console.log('Creating pledge in Airtable...', pledgeData);
+    
+    // Step 1: Find or create donor in People table
+    let donorId = await findOrCreateDonor(pledgeData.donorName, pledgeData.donorEmail);
+    
+    // Step 2: Create the pledge record
+    const pledgeRecord = await tables.pledges.create([
+      {
+        fields: {
+          'Donor': [donorId], // Link to People table
+          'PledgeCampus': [pledgeData.campusId], // Link to Campuses table
+          'Campaign': [pledgeData.campaignId], // Link to Campaigns table
+          'Amount': parseFloat(pledgeData.pledgeAmount),
+          'PledgeDate': pledgeData.startDate,
+          'Notes': pledgeData.notes || '',
+          'PledgeType': pledgeData.pledgeType === 'one-time' ? 'One-time' : 'Recurring',
+          // CORRECTED: Use the frequency passed from the form
+          'RecurringFrequency': pledgeData.pledgeType === 'regular' ? pledgeData.recurringFrequency : null,
+          'PledgeEndDate': pledgeData.pledgeType === 'regular' ? pledgeData.endDate : null
+        }
+      }
+    ]);
+    
+    const createdPledge = {
+      id: pledgeRecord[0].id,
+      amount: pledgeRecord[0].fields['Amount'],
+      type: pledgeRecord[0].fields['PledgeType'],
+      date: pledgeRecord[0].fields['PledgeDate']
+    };
+    
+    console.log('✅ Pledge created successfully:', createdPledge);
+    return createdPledge;
+    
+  } catch (error) {
+    console.error('❌ Error creating pledge:', error);
+    throw error;
+  }
+};
+
+// Helper function to find or create a donor in the People table
+export const findOrCreateDonor = async (donorName, donorEmail) => {
+  try {
+    console.log('Finding or creating donor:', donorName, donorEmail);
+    
+    // First, try to find existing donor by email
+    const existingRecords = await tables.people.select({
+      filterByFormula: `{Email} = "${donorEmail}"`
+    }).all();
+    
+    if (existingRecords.length > 0) {
+      console.log('✅ Found existing donor:', existingRecords[0].id);
+      return existingRecords[0].id;
+    }
+    
+    // If no existing donor found, create a new one
+    console.log('Creating new donor...');
+    const newDonorRecord = await tables.people.create([
+      {
+        fields: {
+          'Name': donorName,
+          'Email': donorEmail
+          // Add other fields as needed based on your People table structure
+        }
+      }
+    ]);
+    
+    console.log('✅ Created new donor:', newDonorRecord[0].id);
+    return newDonorRecord[0].id;
+    
+  } catch (error) {
+    console.error('❌ Error finding/creating donor:', error);
+    throw error;
+  }
+};
+
+
+// Create a gift record in Airtable
+export const createGift = async (giftData) => {
+  try {
+    console.log('Creating gift in Airtable...', giftData);
+
+    // Step 1: Find or create the donor
+    const donorId = await findOrCreateDonor(giftData.donorName, giftData.donorEmail);
+
+    // Step 2: Prepare the gift record fields
+    const fields = {
+      'Donor': [donorId],
+      'Amount': parseFloat(giftData.amount),
+      'GiftDate': new Date().toISOString().split('T')[0],
+      'Campaign': [giftData.campaignId],
+      'GiftCampus': [giftData.campusId],
+      'GiftType': giftData.giftType || 'One-time',
+    };
+
+    // CORRECTED: Conditionally add the RecurringFrequency field
+    if (giftData.giftType === 'Recurring') {
+      fields['RecurringFrequency'] = giftData.recurringFrequency;
+    }
+
+    // Step 3: Create the gift record
+    const record = await tables.gifts.create([{ fields }]);
+
+    const createdGift = {
+      id: record[0].id,
+      amount: record[0].fields['Amount']
+    };
+
+    console.log('✅ Gift created successfully:', createdGift);
+    return createdGift;
+
+  } catch (error) {
+    console.error('❌ Error creating gift:', error);
+    throw error;
+  }
+};
