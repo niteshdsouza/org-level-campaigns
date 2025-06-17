@@ -14,6 +14,8 @@ function GivingPage() {
   const [campaign, setCampaign] = useState(null);
   const [campus, setCampus] = useState(null);
   const [listing, setListing] = useState(null);
+  const [availableCampuses, setAvailableCampuses] = useState([]);
+  const [isCampusSelectionMode, setIsCampusSelectionMode] = useState(false);
   
   // Step management
   const [currentStep, setCurrentStep] = useState(1); // 1: Gift Details, 2: Personal Details, 3: Payment Method, 4: Confirm Gift
@@ -73,33 +75,58 @@ function GivingPage() {
       try {
         setLoading(true);
         setError('');
-        const { campaignId, campusId, listingId, errors, isValid } = extractGivingParams(location.search);
-        if (!isValid) {
-          setError(formatParamErrors(errors));
-          setLoading(false);
-          return;
+        const params = new URLSearchParams(location.search);
+        const campaignId = params.get('campaign');
+        const campusId = params.get('campus'); // Might be null
+        const listingId = params.get('listing');
+
+        if (!campaignId || !listingId) {
+            setError(formatParamErrors(['Campaign or Listing ID is missing.']));
+            setLoading(false);
+            return;
         }
-        const { isValid: idsValid, errors: idErrors } = validateGivingIds(campaignId, campusId, listingId);
-        if (!idsValid) {
-          setError(formatParamErrors(idErrors));
-          setLoading(false);
-          return;
-        }
-        const [campaignData, campusesData, listingsData] = await Promise.all([
+
+        const [campaignData, allCampuses, allListings] = await Promise.all([
           fetchCampaignById(campaignId),
           fetchCampuses(),
           fetchListings()
         ]);
-        const campusData = campusesData.find(c => c.id === campusId);
-        const listingData = listingsData.find(l => l.id === listingId);
-        if (!campaignData || !campusData || !listingData) {
-          setError('Campaign, campus, or giving option not found.');
-          setLoading(false);
-          return;
+
+        if (!campaignData) {
+            setError('Campaign not found.');
+            setLoading(false);
+            return;
         }
         setCampaign(campaignData);
-        setCampus(campusData);
+
+        const listingData = allListings.find(l => l.id === listingId);
+        if (!listingData) {
+            setError('Giving option (listing) not found.');
+            setLoading(false);
+            return;
+        }
         setListing(listingData);
+
+        if (campusId) {
+            const campusData = allCampuses.find(c => c.id === campusId);
+            if (!campusData || !campaignData.assignedCampuses.includes(campusId)) {
+                setError('The provided campus is not valid for this campaign.');
+                setLoading(false);
+                return;
+            }
+            setCampus(campusData);
+            setIsCampusSelectionMode(false);
+        } else {
+            const assigned = allCampuses.filter(c => campaignData.assignedCampuses.includes(c.id));
+            if (assigned.length === 0) {
+                setError('This campaign has no campuses assigned to it.');
+                setLoading(false);
+                return;
+            }
+            setAvailableCampuses(assigned);
+            setIsCampusSelectionMode(true);
+        }
+
       } catch (err) {
         console.error('GivingPage: Error loading data:', err);
         setError('Unable to load giving page information. Please try again later.');
@@ -109,6 +136,14 @@ function GivingPage() {
     };
     loadPageData();
   }, [location.search]);
+  
+  const handleCampusSelect = (e) => {
+    const selectedId = e.target.value;
+    if (selectedId) {
+      const selected = availableCampuses.find(c => c.id === selectedId);
+      setCampus(selected);
+    }
+  };
 
   // --- Handlers ---
   const handleInputChange = (e) => {
@@ -215,8 +250,8 @@ function GivingPage() {
         <>
             <div className="giving-hero">
                 <div className="hero-content">
-                    <h1 className="campaign-title">{campaign.name}</h1>
-                    <p className="campus-subtitle">{campus.name} via {listing.name}</p>
+                    <h1 className="campaign-title">{campaign?.name}</h1>
+                    <p className="campus-subtitle">{campus ? `${campus.name} via ${listing.name}` : ' '}</p>
                     <h2 className="giving-heading">Make a Gift</h2>
                     
                     <div className="amount-display">
@@ -230,7 +265,7 @@ function GivingPage() {
                             className="amount-input-large"
                             min="0"
                             step="0.01"
-                            disabled={currentStep > 1}
+                            disabled={!campus || currentStep > 1}
                         />
                     </div>
                     {formData.giftType === 'regular' && totalRecurringAmount && (
@@ -244,33 +279,44 @@ function GivingPage() {
                 <div className="card-content">
                 {currentStep === 1 && (
                     <form onSubmit={handleProceedToUserDetails}>
-                    <div className="form-section">
-                        <h4>How would you like to give?</h4>
-                        <div className="gift-type-buttons">
-                        <button type="button" className={`type-btn ${formData.giftType === 'one-time' ? 'active' : ''}`} onClick={() => handleInputChange({ target: { name: 'giftType', value: 'one-time' }})}>Give one time</button>
-                        <button type="button" className={`type-btn ${formData.giftType === 'regular' ? 'active' : ''}`} onClick={() => handleInputChange({ target: { name: 'giftType', value: 'regular' }})}>Give regularly</button>
+                     {isCampusSelectionMode && (
+                        <div className="form-section form-campus-selector">
+                           <h4 className="form-section-header">Select Your Campus</h4>
+                           <select id="campus-select" className="campus-select-dropdown" onChange={handleCampusSelect} defaultValue="">
+                              <option value="" disabled>Choose a campus...</option>
+                              {availableCampuses.map(c => (<option key={c.id} value={c.id}>{c.name}</option>))}
+                           </select>
                         </div>
-                    </div>
+                     )}
+                     <fieldset disabled={!campus}>
+                        <div className="form-section">
+                           <h4>How would you like to give?</h4>
+                           <div className="gift-type-buttons">
+                           <button type="button" className={`type-btn ${formData.giftType === 'one-time' ? 'active' : ''}`} onClick={() => handleInputChange({ target: { name: 'giftType', value: 'one-time' }})}>Give one time</button>
+                           <button type="button" className={`type-btn ${formData.giftType === 'regular' ? 'active' : ''}`} onClick={() => handleInputChange({ target: { name: 'giftType', value: 'regular' }})}>Give regularly</button>
+                           </div>
+                        </div>
 
-                    {formData.giftType === 'regular' && (
-                        <>
-                        <div className="form-section">
-                            <h4>Frequency</h4>
-                            <div className="gift-type-buttons" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <button type="button" className={`type-btn ${formData.recurringFrequency === 'Monthly' ? 'active' : ''}`} onClick={() => handleInputChange({ target: { name: 'recurringFrequency', value: 'Monthly' }})}>Monthly</button>
-                            <button type="button" className={`type-btn ${formData.recurringFrequency === 'Quarterly' ? 'active' : ''}`} onClick={() => handleInputChange({ target: { name: 'recurringFrequency', value: 'Quarterly' }})}>Quarterly</button>
-                            <button type="button" className={`type-btn ${formData.recurringFrequency === 'Annually' ? 'active' : ''}`} onClick={() => handleInputChange({ target: { name: 'recurringFrequency', value: 'Annually' }})}>Annually</button>
-                            </div>
-                        </div>
-                        <div className="form-section">
-                            <div className="date-fields">
-                            <div className="date-field"><label htmlFor="startDate">Starting</label><input type="date" id="startDate" name="startDate" value={formData.startDate} onChange={handleInputChange} required /></div>
-                            <div className="date-field"><label htmlFor="endDate">Ending</label><input type="date" id="endDate" name="endDate" value={formData.endDate} onChange={handleInputChange} required /></div>
-                            </div>
-                        </div>
-                        </>
-                    )}
-                    <button type="submit" className="next-btn" style={{background: '#f59e0b'}}>Next</button>
+                        {formData.giftType === 'regular' && (
+                           <>
+                           <div className="form-section">
+                                 <h4>Frequency</h4>
+                                 <div className="gift-type-buttons" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+                                 <button type="button" className={`type-btn ${formData.recurringFrequency === 'Monthly' ? 'active' : ''}`} onClick={() => handleInputChange({ target: { name: 'recurringFrequency', value: 'Monthly' }})}>Monthly</button>
+                                 <button type="button" className={`type-btn ${formData.recurringFrequency === 'Quarterly' ? 'active' : ''}`} onClick={() => handleInputChange({ target: { name: 'recurringFrequency', value: 'Quarterly' }})}>Quarterly</button>
+                                 <button type="button" className={`type-btn ${formData.recurringFrequency === 'Annually' ? 'active' : ''}`} onClick={() => handleInputChange({ target: { name: 'recurringFrequency', value: 'Annually' }})}>Annually</button>
+                                 </div>
+                           </div>
+                           <div className="form-section">
+                                 <div className="date-fields">
+                                 <div className="date-field"><label htmlFor="startDate">Starting</label><input type="date" id="startDate" name="startDate" value={formData.startDate} onChange={handleInputChange} required /></div>
+                                 <div className="date-field"><label htmlFor="endDate">Ending</label><input type="date" id="endDate" name="endDate" value={formData.endDate} onChange={handleInputChange} required /></div>
+                                 </div>
+                           </div>
+                           </>
+                        )}
+                        <button type="submit" className="next-btn" style={{background: '#f59e0b'}}>Next</button>
+                     </fieldset>
                     </form>
                 )}
 
@@ -358,7 +404,6 @@ function GivingPage() {
 
   return (
     <div className="giving-page-layout">
-        {/* ADDED HEADER HERE */}
         <header className="giving-page-header">
             <div className="header-content">
                 <div className="logo-section">

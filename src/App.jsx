@@ -9,6 +9,8 @@ import AddPledge from './AddPledge';
 import ShareModal from './ShareModal';
 import PledgePage from './PledgePage';
 import GivingPage from './GivingPage';
+import EditPledge from './EditPledge';
+
 
 // Helper function to calculate role-based campaign statistics
 const calculateRoleBasedCampaignStats = (campaign, userRole, userCampuses) => {
@@ -1010,6 +1012,7 @@ function App() {
         <Route path="/add-pledge" element={<AddPledge userRole={userRole} userCampuses={userCampuses} />} />
         <Route path="/pledge" element={<PledgePage />} />
         <Route path="/give" element={<GivingPage />} />
+        <Route path="/edit-pledge/:pledgeId" element={<EditPledge userRole={userRole} userCampuses={userCampuses} />} />
       </Routes>
     </Router>
   )

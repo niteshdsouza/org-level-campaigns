@@ -1,3 +1,10 @@
+/* Removes default browser styling from the fieldset element */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
 /* PledgePage.css - Light theme with app consistency */
 
 * {
@@ -1149,3 +1156,50 @@
     font-size: 15px;
   }
 }
+
+/* NEW: Integrated Campus Selector within the form */
+.form-campus-selector {
+  padding: 24px;
+  margin-bottom: 30px;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.form-campus-selector .form-section-header {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.campus-select-dropdown {
+  width: 100%;
+  max-width: 400px;
+  padding: 14px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 16px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 48px;
+}
+
+.campus-select-dropdown:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Add a min-height to the subtitle to prevent layout shift */
+.campus-subtitle {
+min-height: 38px;
+}
+

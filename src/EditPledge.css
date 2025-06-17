@@ -1,0 +1,83 @@
+/* Import all the styles from AddPledge.css to keep the look consistent */
+@import url('./AddPledge.css');
+
+/* New style for the recurring pledge calculation breakdown */
+.recurring-calculation-breakdown {
+  margin-top: 10px; /* Adds a little space above the text */
+  padding: 8px 12px;
+  background-color: #f3f4f6; /* A light grey background */
+  border-radius: 6px;
+  font-size: 14px;
+  color: #4b5563; /* A slightly softer text color */
+  max-width: 400px;
+  border: 1px solid #e5e7eb;
+}
+
+.recurring-calculation-breakdown .calculation-text {
+  font-weight: 500;
+}
+
+.recurring-calculation-breakdown .total-amount {
+  font-weight: 700;
+  color: #1f2937; /* Darker text for the total */
+}
+
+/* --- Confirmation Modal Styles --- */
+
+.confirm-modal-body {
+  padding: 24px;
+  text-align: center;
+}
+
+.confirm-modal-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  color: #059669; /* Teal/Green color from image */
+  background-color: #e6f6f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  border: 4px solid #f0fdf4;
+}
+
+.confirm-modal-question {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 24px;
+}
+
+.pledge-summary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  border-top: 1px solid #e5e7eb;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.summary-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.summary-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.summary-value.highlight {
+    color: #059669;
+}

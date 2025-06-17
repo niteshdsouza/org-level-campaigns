@@ -581,9 +581,9 @@ function AddPledge({ userRole, userCampuses }) {
                                     </button>
                                     {openPledgeDropdown === pledge.id && (
                                     <div className="pledge-dropdown-menu">
-                                        <div className="pledge-dropdown-item" onClick={() => alert('Edit functionality coming soon!')}>
-                                        <span className="dropdown-icon">✏️</span> Edit pledge
-                                        </div>
+                                       <div className="pledge-dropdown-item" onClick={() => navigate(`/edit-pledge/${pledge.id}`)}>
+                                            <span className="dropdown-icon">✏️</span> Edit pledge
+                                      </div>
                                         {/* UPDATED: This now opens the delete modal */}
                                         <div className="pledge-dropdown-item" onClick={() => handleDeletePledge(pledge.id)}>
                                         <span className="dropdown-icon">🗑️</span> Delete
