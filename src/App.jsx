@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import CreateCampaign from './CreateCampaign';
 import AssignCampuses from './AssignCampuses';
-import { fetchCampaigns } from './airtable';
+import { fetchCampaigns, fetchCampusGoals } from './airtable';
 import CampaignDetail from './CampaignDetail';
 import AddPledge from './AddPledge';
 import ShareModal from './ShareModal';
@@ -13,35 +13,60 @@ import EditPledge from './EditPledge';
 
 
 // Helper function to calculate role-based campaign statistics
-const calculateRoleBasedCampaignStats = (campaign, userRole, userCampuses) => {
-  // Financial goal stays the same for everyone (it's the campaign's overall goal)
-  const financialGoal = campaign.financialGoal || 0;
-  
-  // If no campus breakdown data exists, return the original totals
+const calculateRoleBasedCampaignStats = (campaign, userRole, userCampuses, allCampusGoals, selectedCampusFilter) => {
+  let financialGoal;
+
+  // If a specific campus is selected in the main filter, find its specific goal for this campaign.
+  if (selectedCampusFilter && selectedCampusFilter !== 'all') {
+    const specificGoalRecord = allCampusGoals.find(g => 
+      g.campaignId === campaign.id && g.campusId === selectedCampusFilter
+    );
+    financialGoal = specificGoalRecord ? specificGoalRecord.goal : 0;
+  } else {
+    // "All Campuses" is selected. The goal now depends on the user's role.
+    if (userRole === 'org-admin') {
+      // Org Admins see the total campaign goal.
+      financialGoal = campaign.financialGoal || 0;
+    } else {
+      // Campus Admins see the sum of goals for ONLY their accessible campuses.
+      const accessibleGoals = allCampusGoals.filter(goal => 
+        userCampuses.includes(goal.campusId) && goal.campaignId === campaign.id
+      );
+      financialGoal = accessibleGoals.reduce((sum, currentGoal) => sum + currentGoal.goal, 0);
+    }
+  }
+
+  // If no campus breakdown data exists for raised/pledged, return totals with the dynamic goal.
   if (!campaign.campusBreakdown || campaign.campusBreakdown.length === 0) {
     return {
       raised: campaign.raised || 0,
       pledged: campaign.pledged || 0,
-      financialGoal: financialGoal
+      financialGoal: financialGoal // Use the new dynamic goal
     };
   }
   
   let filteredCampusData = [];
   
+  // 1. First, filter by the user's ROLE
   if (userRole === 'org-admin') {
-    // Org admin sees ALL campus data
+    // Org admin starts with ALL campus data.
     filteredCampusData = campaign.campusBreakdown;
   } else if (userRole === 'single-campus' || userRole === 'multi-campus') {
-    // Campus admins only see data for their assigned campuses
+    // Campus admins only see data for their assigned campuses.
     filteredCampusData = campaign.campusBreakdown.filter(campus => 
       userCampuses.includes(campus.campusId)
     );
   } else {
-    // Fallback - show all data if role is unknown
+    // Fallback - show all data if role is unknown.
     filteredCampusData = campaign.campusBreakdown;
   }
+
+  // 2. After role filtering, apply the dropdown filter if it's active.
+  if (selectedCampusFilter && selectedCampusFilter !== 'all') {
+    filteredCampusData = filteredCampusData.filter(campus => campus.campusId === selectedCampusFilter);
+  }
   
-  // Aggregate the filtered campus data
+  // Aggregate the now-correctly-filtered campus data for raised/pledged amounts.
   const aggregatedStats = filteredCampusData.reduce((totals, campus) => {
     return {
       raised: totals.raised + (campus.raised || 0),
@@ -52,7 +77,7 @@ const calculateRoleBasedCampaignStats = (campaign, userRole, userCampuses) => {
   return {
     raised: aggregatedStats.raised,
     pledged: aggregatedStats.pledged,
-    financialGoal: financialGoal
+    financialGoal: financialGoal // Return the final dynamic goal
   };
 };
 
@@ -164,20 +189,26 @@ const [campaignToClose, setCampaignToClose] = useState(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [campaignToShare, setCampaignToShare] = useState(null);
 
+  // NEW: State to hold the campus goals data
+  const [campusGoalsData, setCampusGoalsData] = useState([]);
+
   useEffect(() => {
     const loadCampaignsAndCampuses = async () => {
       try {
         setLoadingCampaigns(true);
         setLoadingCampuses(true);
         
-        // Import fetchCampuses function
-        const { fetchCampuses } = await import('./airtable');
+        // Import fetchCampuses and fetchCampusGoals function
+        const { fetchCampuses, fetchCampusGoals } = await import('./airtable');
         
-        // Fetch both campaigns and campuses in parallel
-        const [campaignData, campusData] = await Promise.all([
+        // Fetch campaigns, campuses, and campus goals in parallel
+        const [campaignData, campusData, allCampusGoals] = await Promise.all([
           fetchCampaigns(),
-          fetchCampuses()
+          fetchCampuses(),
+          fetchCampusGoals() // Fetch the new data
         ]);
+        
+        setCampusGoalsData(allCampusGoals); // Store the new data in state
         
         // Set up available campuses based on user role
         let userAccessibleCampuses = [];
@@ -711,7 +742,13 @@ const handleCloseCampaign = async (campaignId) => {
               // Campaign cards with role-based aggregation
               filteredCampaigns.map((campaign) => {
                 // Calculate role-based stats for this campaign
-                const roleBasedStats = calculateRoleBasedCampaignStats(campaign, userRole, userCampuses);
+                const roleBasedStats = calculateRoleBasedCampaignStats(
+                  campaign, 
+                  userRole, 
+                  userCampuses,
+                  campusGoalsData,      // Pass new state
+                  selectedCampusFilter  // Pass filter state
+                );
                 
                 return (
                   <div key={campaign.id} className="campaign-card">

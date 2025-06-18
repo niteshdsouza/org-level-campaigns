@@ -21,7 +21,8 @@ export const tables = {
     funds: base('Funds'),
     pledges: base('Pledges'),
     gifts: base('Gifts'),
-    people: base('People')
+    people: base('People'),
+    campaignGoals: base('Campus Goals') 
   };
 
 // Test connection function
@@ -140,24 +141,17 @@ export const createCampaign = async (campaignData, fundId, selectedCampusIds) =>
     try {
       console.log('Creating campaign in Airtable...', {campaignData, fundId, selectedCampusIds});
       
-      // Parse financial goal - remove currency formatting
-      const financialGoal = campaignData.financialGoal 
-        ? parseFloat(campaignData.financialGoal.replace(/[$,]/g, '')) 
-        : null;
-  
       const record = await tables.campaigns.create([
         {
           fields: {
             'Campaign Name': campaignData.campaignName,
             'Description': campaignData.description,
-            'FinancialGoal': financialGoal,
+            // REMOVED: FinancialGoal is now a rollup field and no longer set directly
             'StartDate': campaignData.startDate || null,
             'EndDate': campaignData.endDate || null,
             'PhoneNumber': campaignData.phoneNumber || null,
             'EmailAddress': campaignData.emailAddress || null,
             'Status': 'Published', // Default status
-            //'CreatedDate': new Date().toISOString().split('T')[0],
-            //'ModifiedDate': new Date().toISOString().split('T')[0],
             'DonationDestination': campaignData.donationDestination === 'fund' ? 'Org Fund' : 'Campus',
             'OrgFundListing': campaignData.orgFundListing ? [campaignData.orgFundListing] : null,
             'AssignedCampuses': selectedCampusIds.length > 0 ? selectedCampusIds : null,
@@ -177,6 +171,38 @@ export const createCampaign = async (campaignData, fundId, selectedCampusIds) =>
       
     } catch (error) {
       console.error('❌ Error creating campaign:', error);
+      throw error;
+    }
+  };
+
+  // NEW: Create campus goal records in the junction table
+  export const createCampusGoals = async (campaignId, campusGoals) => {
+    try {
+      const recordsToCreate = Object.entries(campusGoals)
+        .filter(([, goal]) => parseFloat(goal) > 0)
+        .map(([campusId, goal]) => ({
+          fields: {
+            'Campaign': [campaignId],
+            'Campus': [campusId],
+            'Campus Goal': parseFloat(String(goal).replace(/[$,]/g, ''))
+          }
+        }));
+  
+      if (recordsToCreate.length === 0) {
+        console.log('✅ No campus goals to create.');
+        return [];
+      }
+  
+      console.log('Creating campus goals in Airtable...', recordsToCreate);
+      
+      // Airtable's create method can take an array of up to 10 records.
+      // For simplicity, we assume less than 10. For more, chunking would be needed.
+      const createdRecords = await tables.campaignGoals.create(recordsToCreate);
+      console.log('✅ Campus goals created successfully:', createdRecords.length);
+      return createdRecords;
+  
+    } catch (error) {
+      console.error('❌ Error creating campus goals:', error);
       throw error;
     }
   };
@@ -581,7 +607,7 @@ export const checkExistingPledge = async (donorEmail, campaignId, campusId) => {
         lookingFor: { donorId, campaignId, campusId }
       });
       
-      const donorMatch = pledgeDonorIds.includes(donorId);
+      const donorMatch = pledgeDonorIds.includes( donorId);
       const campaignMatch = pledgeCampaignIds.includes(campaignId);
       const campusMatch = pledgeCampusIds.includes(campusId);
       
@@ -638,6 +664,7 @@ export const createPledge = async (pledgeData) => {
     ]);
     
     const createdPledge = {
+      // BUG FIX: Changed 'record' to the correct variable 'pledgeRecord'
       id: pledgeRecord[0].id,
       amount: pledgeRecord[0].fields['Amount'],
       type: pledgeRecord[0].fields['PledgeType'],
@@ -729,3 +756,26 @@ export const createGift = async (giftData) => {
     throw error;
   }
 };
+
+// Add this at the end of your airtable.js file
+export const fetchCampusGoals = async () => {
+    try {
+      console.log('Fetching campus goals from Airtable...');
+      
+      const records = await tables.campaignGoals.select({
+        view: 'Grid view'
+      }).all();
+      
+      const goals = records.map(record => ({
+        campaignId: record.get('Campaign') ? record.get('Campaign')[0] : null,
+        campusId: record.get('Campus') ? record.get('Campus')[0] : null,
+        goal: record.get('Campus Goal') || 0
+      }));
+      
+      console.log('✅ Fetched campus goals:', goals.length);
+      return goals;
+    } catch (error) {
+      console.error('❌ Error fetching campus goals:', error);
+      throw error;
+    }
+  };

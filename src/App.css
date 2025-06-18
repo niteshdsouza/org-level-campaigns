@@ -1786,3 +1786,90 @@ input[type="date"] {
     width: 100vw;
   }
 }
+
+/* Add these styles for the new "Assign Campuses" layout */
+.financial-goal-section {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.financial-goal-section .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 16px 0;
+}
+
+.financial-goal-display {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.financial-goal-display .label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+/* Styles for the editable main goal input */
+.financial-goal-display .amount-input {
+  font-size: 32px;
+  font-weight: 700;
+  color: #059669;
+  border: none;
+  background-color: transparent;
+  width: 100%;
+  padding: 0;
+  box-shadow: none;
+  outline: none;
+}
+
+.financial-goal-display .amount-input:focus {
+    box-shadow: none;
+    border: none;
+}
+
+
+.split-goal-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.split-goal-option label {
+    font-size: 14px;
+    color: #374151;
+    cursor: pointer;
+}
+
+/* Update Campus Table Grid to match new design */
+.campus-table .table-header,
+.campus-table .table-row {
+  grid-template-columns: 1fr 200px 200px; /* Adjust grid for new column */
+}
+
+.goal-input-cell {
+  padding: 16px;
+}
+
+.goal-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: right;
+  background-color: white;
+  color: black;
+}
+
+.goal-input:disabled {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+}

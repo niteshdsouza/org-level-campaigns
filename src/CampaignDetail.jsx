@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import './CampaignDetail.css';
-import { fetchCampaignById, fetchCampaignDonors } from './airtable';
+import { fetchCampaignById, fetchCampaignDonors, fetchCampusGoals } from './airtable';
 
 function CampaignDetail({ userRole, userCampuses }) {
   const { id } = useParams();
@@ -12,50 +12,43 @@ function CampaignDetail({ userRole, userCampuses }) {
   const [activeTab, setActiveTab] = useState('campus');
   const [donors, setDonors] = useState([]);
   
-  // NEW: Page-level campus filter state
   const [selectedPageCampus, setSelectedPageCampus] = useState('all');
   const [availableCampuses, setAvailableCampuses] = useState([]);
   const [userAccessibleCampusIds, setUserAccessibleCampusIds] = useState([]);
   
-  // NEW: Search functionality state (only for members tab now)
+  const [campusGoalsData, setCampusGoalsData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch real campaign data and donors
   useEffect(() => {
     const loadCampaign = async () => {
       try {
         setLoading(true);
         
-        // Fetch campaign data and donor data in parallel
-        const [campaignData, donorData] = await Promise.all([
+        const [campaignData, donorData, allCampusGoals] = await Promise.all([
           fetchCampaignById(id),
-          fetchCampaignDonors(id)
+          fetchCampaignDonors(id),
+          fetchCampusGoals()
         ]);
         
         setCampaign(campaignData);
         setDonors(donorData);
+        setCampusGoalsData(allCampusGoals);
         
-        // NEW: Set up available campuses based on user role and campaign's assigned campuses
         if (campaignData && campaignData.assignedCampuses) {
-          // Import fetchCampuses to get campus details
           const { fetchCampuses } = await import('./airtable');
           const allCampuses = await fetchCampuses();
           
-          // First filter by campaign assignment
           let campaignCampuses = allCampuses.filter(campus => 
             campaignData.assignedCampuses.includes(campus.id)
           );
           
-          // Then filter based on user role permissions
           let userAccessibleCampuses = [];
           let accessibleCampusIds = [];
           
           if (userRole === 'org-admin') {
-            // Org admin sees all campuses assigned to this campaign
             userAccessibleCampuses = campaignCampuses;
             accessibleCampusIds = campaignCampuses.map(c => c.id);
           } else if (userRole === 'single-campus' || userRole === 'multi-campus') {
-            // Campus admins only see their assigned campuses that are also part of this campaign
             userAccessibleCampuses = campaignCampuses.filter(campus => 
               userCampuses.includes(campus.id)
             );
@@ -76,51 +69,50 @@ function CampaignDetail({ userRole, userCampuses }) {
     loadCampaign();
   }, [id, userRole, userCampuses]);
 
-  // NEW: Clear search when switching tabs
   useEffect(() => {
     setSearchQuery('');
   }, [activeTab]);
 
-  // NEW: Get filtered overview data based on selected campus and user permissions
+  const handleCampusRowClick = (campusId) => {
+    setSelectedPageCampus(campusId);
+    setActiveTab('members');
+  };
+
   const getOverviewData = () => {
-    // Always ensure we have the financial goal from the main campaign
-    const campaignGoal = campaign?.financialGoal || 0;
+    let financialGoal;
+
+    if (selectedPageCampus === 'all') {
+      if (userRole === 'org-admin') {
+        financialGoal = campaign?.financialGoal || 0;
+      } else {
+        const accessibleGoals = campusGoalsData.filter(goal => 
+          userAccessibleCampusIds.includes(goal.campusId) && goal.campaignId === campaign?.id
+        );
+        financialGoal = accessibleGoals.reduce((sum, currentGoal) => sum + currentGoal.goal, 0);
+      }
+    } else {
+      const specificGoal = campusGoalsData.find(
+        (goal) => goal.campaignId === campaign?.id && goal.campusId === selectedPageCampus
+      );
+      financialGoal = specificGoal ? specificGoal.goal : 0;
+    }
     
     if (selectedPageCampus === 'all') {
-      // For "All Campuses", aggregate data only for campuses user has access to
       if (!campaign?.campusBreakdown) {
         return {
           totalRaised: campaign?.totalRaised || 0,
           totalPledged: campaign?.totalPledged || 0,
-          financialGoal: campaignGoal,
+          financialGoal: financialGoal,
           giftCount: campaign?.giftCount || 0,
           pledgeCount: campaign?.pledgeCount || 0
         };
       }
       
-      console.log('All Campuses selected - Debug info:');
-      console.log('userAccessibleCampusIds:', userAccessibleCampusIds);
-      console.log('campaign.campusBreakdown:', campaign.campusBreakdown);
-      console.log('campaignGoal:', campaignGoal);
+      const accessibleCampusData = campaign.campusBreakdown.filter(campus => 
+        userAccessibleCampusIds.includes(campus.campusId)
+      );
       
-      // Filter campus breakdown to only include accessible campuses
-      const accessibleCampusData = campaign.campusBreakdown.filter(campus => {
-        const isAccessible = userAccessibleCampusIds.includes(campus.campusId);
-        console.log(`Campus ${campus.campusName} (${campus.campusId}): accessible = ${isAccessible}`);
-        return isAccessible;
-      });
-      
-      console.log('accessibleCampusData:', accessibleCampusData);
-      
-      // Aggregate the data for accessible campuses
       const aggregated = accessibleCampusData.reduce((acc, campus) => {
-        console.log(`Aggregating campus ${campus.campusName}:`, {
-          raised: campus.raised,
-          pledged: campus.pledged,
-          giftCount: campus.giftCount,
-          pledgeCount: campus.pledgeCount
-        });
-        
         return {
           totalRaised: acc.totalRaised + (campus.raised || 0),
           totalPledged: acc.totalPledged + (campus.pledged || 0),
@@ -134,27 +126,19 @@ function CampaignDetail({ userRole, userCampuses }) {
         pledgeCount: 0
       });
       
-      // Ensure we always include the campaign goal
-      aggregated.financialGoal = campaignGoal;
-      
-      console.log('Final aggregated data:', aggregated);
+      aggregated.financialGoal = financialGoal;
       return aggregated;
     }
     
-    // For specific campus selection, find the selected campus data
     const campusData = campaign.campusBreakdown.find(
       campus => campus.campusId === selectedPageCampus
     );
-    
-    console.log('Specific campus selected:', selectedPageCampus);
-    console.log('Found campus data:', campusData);
-    console.log('Using campaign goal:', campaignGoal);
     
     if (campusData) {
       return {
         totalRaised: campusData.raised || 0,
         totalPledged: campusData.pledged || 0,
-        financialGoal: campaignGoal, // Always use campaign goal
+        financialGoal: financialGoal,
         giftCount: campusData.giftCount || 0,
         pledgeCount: campusData.pledgeCount || 0
       };
@@ -163,59 +147,54 @@ function CampaignDetail({ userRole, userCampuses }) {
     return {
       totalRaised: 0,
       totalPledged: 0,
-      financialGoal: campaignGoal, // Always use campaign goal
+      financialGoal: financialGoal,
       giftCount: 0,
       pledgeCount: 0
     };
   };
 
-  // NEW: Get filtered campus data for campus tab (respects user permissions)
   const getCampusTabData = () => {
     if (!campaign?.assignedCampuses || !availableCampuses.length) return [];
     
-    // Create campus data for all accessible campuses, even if they have no activity
     const campusTabData = availableCampuses.map(campus => {
-      // Look for existing data in campusBreakdown
       const existingData = campaign.campusBreakdown?.find(
         breakdown => breakdown.campusId === campus.id
       );
       
-      // Return campus with data (or zeros if no activity)
+      const goalData = campusGoalsData.find(g => 
+        g.campusId === campus.id && g.campaignId === campaign?.id
+      );
+      const campusGoal = goalData ? goalData.goal : 0;
+
       return {
         campusId: campus.id,
         campusName: campus.name,
         pledged: existingData?.pledged || 0,
         raised: existingData?.raised || 0,
         giftCount: existingData?.giftCount || 0,
-        pledgeCount: existingData?.pledgeCount || 0
+        pledgeCount: existingData?.pledgeCount || 0,
+        campusGoal: campusGoal
       };
     });
-    
-    console.log('Campus tab data (all accessible campuses):', campusTabData);
     
     if (selectedPageCampus === 'all') {
       return campusTabData;
     }
     
-    // Return only the selected campus (if user has access to it)
     return campusTabData.filter(campus => campus.campusId === selectedPageCampus);
   };
 
-  // NEW: Get filtered members data (respects user permissions)
   const getMembersTabData = () => {
-    // Start with all donors, but filter by user accessible campuses
     let filteredMembers = donors.filter(donor => 
       donor.campusIds.some(campusId => userAccessibleCampusIds.includes(campusId))
     );
 
-    // Apply campus filter if a specific campus is selected
     if (selectedPageCampus !== 'all') {
       filteredMembers = filteredMembers.filter(donor => 
         donor.campusIds.includes(selectedPageCampus)
       );
     }
 
-    // Apply search filter
     if (searchQuery.trim() !== '') {
       filteredMembers = filteredMembers.filter(donor =>
         donor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -244,34 +223,30 @@ function CampaignDetail({ userRole, userCampuses }) {
     }
   };
 
-  // Define breadcrumbs for this page
   const breadcrumbs = [
     { text: 'Campaigns', link: '/org-admin' },
     { text: 'Overview', link: '/org-admin' },
     { text: campaign?.name || 'Loading...' }
   ];
 
-  // NEW: Get current overview data based on filter
   const overviewData = getOverviewData();
   const campusTabData = getCampusTabData();
   const membersTabData = getMembersTabData();
 
-  // NEW: Get selected campus name for display
   const getSelectedCampusName = () => {
     if (selectedPageCampus === 'all') return null;
     const campus = availableCampuses.find(c => c.id === selectedPageCampus);
     return campus?.name || 'Selected Campus';
   };
 
-  // NEW: Get dropdown label based on user role and selection
   const getDropdownLabel = () => {
     if (selectedPageCampus === 'all') {
       if (userRole === 'org-admin') {
         return 'All Campuses';
       } else if (userRole === 'single-campus') {
-        return 'All Campuses'; // Shows only their campus data
+        return 'All Campuses';
       } else if (userRole === 'multi-campus') {
-        return 'All Campuses'; // Shows aggregate of their campuses
+        return 'All Campuses';
       }
       return 'All Campuses';
     }
@@ -290,7 +265,6 @@ function CampaignDetail({ userRole, userCampuses }) {
 
   return (
     <Layout breadcrumbs={breadcrumbs} userRole={userRole} userCampuses={userCampuses}>
-      {/* Campaign Detail Header */}
       <div className="campaign-detail-header">
         <div className="campaign-detail-title">
           <h1>{campaign?.name}</h1>
@@ -305,7 +279,6 @@ function CampaignDetail({ userRole, userCampuses }) {
         </div>
         
         <div className="campaign-detail-actions">
-          {/* NEW: Campus Filter Dropdown */}
           <select 
             className="campus-filter-dropdown"
             value={selectedPageCampus}
@@ -324,7 +297,6 @@ function CampaignDetail({ userRole, userCampuses }) {
         </div>
       </div>
 
-      {/* Overview Stats */}
       <div className="campaign-overview">
         <h2 className="overview-title">
           Overview
@@ -354,10 +326,8 @@ function CampaignDetail({ userRole, userCampuses }) {
           </div>
         </div>
 
-       {/* Progress Bar */}
-        <div className="detail-progress-section">
+       <div className="detail-progress-section">
           <div className="detail-progress-bar">
-            {/* Pledged amount (light green background) */}
             <div 
               className="detail-progress-pledged"
               style={{
@@ -366,7 +336,6 @@ function CampaignDetail({ userRole, userCampuses }) {
                   : '0%'
               }}
             ></div>
-            {/* Raised amount (dark green, on top) */}
             <div 
               className="detail-progress-raised"
               style={{
@@ -392,7 +361,6 @@ function CampaignDetail({ userRole, userCampuses }) {
           </div>
         </div>
 
-        {/* Individual Stats Row */}
         <div className="individual-stats">
           <div className="individual-stat">
             <div className="stat-content">
@@ -416,7 +384,6 @@ function CampaignDetail({ userRole, userCampuses }) {
           </div>
         </div>
 
-        {/* Campaign Timeline */}
         <div className="campaign-timeline">
           {campaign?.startDate && campaign?.endDate ? (
             <span>
@@ -438,9 +405,7 @@ function CampaignDetail({ userRole, userCampuses }) {
         </div>
       </div>
 
-      {/* Campus Breakdown Table */}
       <div className="campus-breakdown">
-        {/* Tab Section */}
         <div className="breakdown-tabs">
           <button 
             className={`breakdown-tab ${activeTab === 'campus' ? 'active' : ''}`}
@@ -457,7 +422,6 @@ function CampaignDetail({ userRole, userCampuses }) {
         </div>
 
         <div className="breakdown-header">
-          {/* NEW: Only show search for members tab */}
           {activeTab === 'members' && (
             <div className="breakdown-search">
               <span className="search-label" style={{ fontSize: '14px', color: '#374151', fontWeight: '500', marginRight: '8px' }}>
@@ -488,7 +452,6 @@ function CampaignDetail({ userRole, userCampuses }) {
           </button>
         </div>
 
-        {/* NEW: Search Results Indicator (only for members tab) */}
         {activeTab === 'members' && searchQuery && (
           <div style={{ 
             marginBottom: '16px', 
@@ -505,26 +468,52 @@ function CampaignDetail({ userRole, userCampuses }) {
         )}
 
         {activeTab === 'campus' ? (
-          // Campus Tab Content
           campusTabData.length > 0 ? (
             <table className="breakdown-table">
               <thead>
                 <tr>
                   <th>Campus</th>
-                  <th>Total pledged</th>
-                  <th>Total raised</th>
+                  <th>Total Pledged</th>
+                  <th>Total Raised</th>
+                  <th>Campus Goal</th>
+                  <th>Progress</th>
                 </tr>
               </thead>
               <tbody>
                 {campusTabData.map((campus) => (
                   <tr key={campus.campusId}>
                     <td>
-                      <span className="campus-name-cell">
+                      <span 
+                        className="campus-name-cell clickable"
+                        style={{ cursor: 'pointer', color: '#10b981', fontWeight: '500' }}
+                        onClick={() => handleCampusRowClick(campus.campusId)}
+                      >
                         {campus.campusName}
                       </span>
                     </td>
                     <td>${campus.pledged?.toLocaleString() || '0'}</td>
                     <td>${campus.raised?.toLocaleString() || '0'}</td>
+                    <td>${campus.campusGoal?.toLocaleString() || '0'}</td>
+                    <td>
+                      <div className="progress-cell">
+                        <div className="progress-bar-small">
+                          <div 
+                            className="progress-fill-small"
+                            style={{ 
+                              width: campus.campusGoal > 0 
+                                ? `${Math.min((campus.raised / campus.campusGoal) * 100, 100)}%`
+                                : '0%' 
+                            }}
+                          ></div>
+                        </div>
+                        <span className="progress-text-small">
+                          {campus.campusGoal > 0
+                            ? `${Math.round((campus.raised / campus.campusGoal) * 100)}%`
+                            : '0%'
+                          }
+                        </span>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -538,7 +527,6 @@ function CampaignDetail({ userRole, userCampuses }) {
             </div>
           )
         ) : (
-          // Members Tab Content
           <div className="members-content">
             <div className="members-header">
               <h3>
